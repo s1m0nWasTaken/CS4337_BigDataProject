@@ -7,5 +7,5 @@ Contributors :
   -  Honglin Li
   -  Bayan Nezamabad
   -  Nicholas OMahony
-  -  Tadhg Ryan
+  -  Tadhg Ryan (21310408)
   -  Szymon Szulc
