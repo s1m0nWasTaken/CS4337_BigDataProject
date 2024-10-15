@@ -1,11 +1,21 @@
 services:
   java-app:
     image: springbootdemo
-    container_name: app
+    container_name: project-app
     networks:
       - net
     ports:
       - "8080:8080"
+  user-service:
+    build:
+      context: UserService
+      dockerfile: Dockerfile
+    image: userservice
+    container_name: user-service
+    networks:
+      - net
+    ports:
+      - "9090:9090"
 networks:
   net:
     driver: bridge
