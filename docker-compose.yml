@@ -1,4 +1,14 @@
 services:
+  mysql:
+    image: mysql:latest
+    container_name: userdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: user_service
+    networks:
+      - net
+    ports:
+      - "3306:3306"
   java-app:
     image: springbootdemo
     container_name: project-app
@@ -11,6 +21,8 @@ services:
       context: UserService
       dockerfile: Dockerfile
     image: userservice
+    depends_on :
+      - mysql
     container_name: user-service
     networks:
       - net
