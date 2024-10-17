@@ -27,13 +27,17 @@ public class User {
   }
 
   public User(
-      int id, UserType type, String username, String email, String address, Date suspendedUntil) {
+      int id, String type, String username, String email, String address, String suspendedUntil) {
     this.id = id;
-    this.userType = type;
+    this.userType = UserType.valueOf(type);
     this.username = username;
     this.email = email;
     this.address = address;
-    this.suspendedUntil = suspendedUntil;
+    if (suspendedUntil != null) {
+      this.suspendedUntil = Date.valueOf(suspendedUntil);
+    } else {
+      this.suspendedUntil = Date.valueOf("1000-01-01");
+    }
   }
 
   public int getId() {
