@@ -9,6 +9,8 @@ services:
       - net
     ports:
       - "3306:3306"
+    volumes:
+      - "./UserService/src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
   java-app:
     image: springbootdemo
     container_name: project-app

@@ -37,24 +37,13 @@ public class UserService {
   }
 
   @GetMapping("/users")
-  public List<Map<String, Object>> users() {
-    List<Map<String, Object>> users;
+  public ResponseEntity<Map<String, Object>> users() {
     try {
-      users = jdbcTemplate.queryForList("SELECT * FROM User");
+      List<User> users = jdbcTemplate.query("SELECT * FROM User", new UserRowMapper());
+      return ResponseEntity.ok(Map.of("success", users));
     } catch (DataAccessException e) {
-      jdbcTemplate.execute("USE user_service;");
-      jdbcTemplate.execute(
-          "CREATE TABLE `User` ("
-              + "id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "userType ENUM('admin', 'shopowner', 'customer') NOT NULL, "
-              + "username VARCHAR(255) NOT NULL, "
-              + "email VARCHAR(255) NOT NULL, "
-              + "address VARCHAR(255), "
-              + "suspendedUntil DATETIME);");
-      users = jdbcTemplate.queryForList(" SELECT *FROM User ");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-
-    return users;
   }
 
   @PostMapping("/users")
