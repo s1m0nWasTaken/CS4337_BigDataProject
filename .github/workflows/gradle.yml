@@ -19,6 +19,9 @@ jobs:
     - name: Give gradlew Permissions
       run: sudo chmod +x gradlew
 
+    - name: Changing Directory
+      run: cd MessagingService
+
     - name: Execute Gradle build
       run: ./gradlew build
 
