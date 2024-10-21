@@ -28,11 +28,6 @@ public class UserService {
     SpringApplication.run(UserService.class, args);
   }
 
-  @GetMapping("/")
-  public Map<String, Object> sayhello() {
-    return Map.of("message", "Hello World");
-  }
-
   @GetMapping("/users") // pass an ishidden feild in json body to choose
   public ResponseEntity<Map<String, Object>>
   users(@RequestBody(required = false) Map<String, String> isHidden) {
