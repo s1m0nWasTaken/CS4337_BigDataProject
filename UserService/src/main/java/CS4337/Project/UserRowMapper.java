@@ -10,13 +10,9 @@ public class UserRowMapper implements RowMapper<User> {
   public User mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
     User user =
         new User(
-            rs.getInt("id"),
-            rs.getString("userType"),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getString("address"),
-            rs.getString("suspendedUntil"));
+            rs.getInt("id"), rs.getString("userType"),
+            rs.getString("username"), rs.getString("email"),
+            rs.getString("address"), rs.getBoolean("isHidden"));
     return user;
   }
-} /*
-  int id, UserType type, String username, String email, String address, Date suspendedUntil */
+}

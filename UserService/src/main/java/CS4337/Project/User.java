@@ -1,7 +1,5 @@
 package CS4337.Project;
 
-import java.sql.Date;
-
 enum UserType {
   admin,
   shopowner,
@@ -14,7 +12,7 @@ public class User {
   private String username;
   private String email;
   private String address;
-  private Date suspendedUntil;
+  private boolean isHidden;
 
   public User() {}
 
@@ -23,21 +21,17 @@ public class User {
     this.username = username;
     this.email = email;
     this.address = address;
-    this.suspendedUntil = Date.valueOf("1000-01-01");
+    this.isHidden = false;
   }
 
   public User(
-      int id, String type, String username, String email, String address, String suspendedUntil) {
+      int id, String type, String username, String email, String address, boolean isHidden) {
     this.id = id;
     this.userType = UserType.valueOf(type);
     this.username = username;
     this.email = email;
     this.address = address;
-    if (suspendedUntil != null) {
-      this.suspendedUntil = Date.valueOf(suspendedUntil);
-    } else {
-      this.suspendedUntil = Date.valueOf("1000-01-01");
-    }
+    this.isHidden = isHidden;
   }
 
   public int getId() {
@@ -56,12 +50,12 @@ public class User {
     return this.email;
   }
 
-  public String getAdress() {
+  public String getAddress() {
     return this.address;
   }
 
-  public Date getSuspendedUntil() {
-    return this.suspendedUntil;
+  public boolean getIsHidden() {
+    return this.isHidden;
   }
 
   public void setUserType(UserType userType) {
@@ -76,11 +70,11 @@ public class User {
     this.email = email;
   }
 
-  public void setAdress(String address) {
+  public void setAddress(String address) {
     this.address = address;
   }
 
-  public void setSuspendedUntil(Date suspendedUntil) {
-    this.suspendedUntil = suspendedUntil;
+  public void setIsHidden(boolean isHidden) {
+    this.isHidden = isHidden;
   }
 }

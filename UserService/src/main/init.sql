@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS `User` (
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     address VARCHAR(255),
-    suspendedUntil DATETIME DEFAULT '1000-01-01');
+    isHidden BOOLEAN DEFAULT FALSE);

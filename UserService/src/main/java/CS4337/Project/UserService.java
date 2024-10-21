@@ -1,6 +1,5 @@
 package CS4337.Project;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +35,26 @@ public class UserService {
     return Map.of("message", "Hello World");
   }
 
-  @GetMapping("/users")
-  public ResponseEntity<Map<String, Object>> users() {
+  @GetMapping("/users") // pass an ishidden feild in json body to choose
+  public ResponseEntity<Map<String, Object>> users(
+      @RequestBody(required = false) Map<String, String> isHidden) {
+    // TODO: later add a check with auth if admin and if so allow to show hidden
+    // and normal else only normal
     try {
-      List<User> users = jdbcTemplate.query("SELECT * FROM User", new UserRowMapper());
-      return ResponseEntity.ok(Map.of("success", users));
+      if (isHidden != null) {
+        Boolean hidden = (isHidden.get("isHidden") == "true" ? true : false);
+        List<User> users =
+            jdbcTemplate.query(
+                "SELECT * FROM User WHERE isHidden = ?", new UserRowMapper(), hidden);
+
+        return ResponseEntity.ok(Map.of("success", users));
+      } else {
+        List<User> users = jdbcTemplate.query("SELECT * FROM User", new UserRowMapper());
+
+        return ResponseEntity.ok(Map.of("success", users));
+      }
     } catch (DataAccessException e) {
+
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
@@ -50,15 +63,15 @@ public class UserService {
   public ResponseEntity<Map<String, Object>> addUser(@RequestBody User user) {
     try {
       String sqlInsert =
-          "INSERT INTO `User` (userType, username, email, address, suspendedUntil) "
+          "INSERT INTO `User` (userType, username, email, address, isHidden) "
               + "VALUES (?, ?, ?, ?,?)";
       jdbcTemplate.update(
           sqlInsert,
           user.getUserType().name(),
           user.getUsername(),
           user.getEmail(),
-          user.getAdress(),
-          Date.valueOf("1000-01-01"));
+          user.getAddress(),
+          user.getIsHidden());
       return ResponseEntity.ok(Map.of("success", 1));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -108,9 +121,9 @@ public class UserService {
         updateStatement.append("email = ?, ");
         params.add(userUpdates.getEmail());
       }
-      if (userUpdates.getAdress() != null) {
+      if (userUpdates.getAddress() != null) {
         updateStatement.append("address = ?, ");
-        params.add(userUpdates.getAdress());
+        params.add(userUpdates.getAddress());
       }
 
       updateStatement.setLength(updateStatement.length() - 2); // Remove last ", "
@@ -128,11 +141,11 @@ public class UserService {
   public ResponseEntity<Map<String, Object>> banUser(
       @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
     try {
-      String dateStr = requestBody.get("date");
-      Date date = Date.valueOf(dateStr);
-      String banStatement = "UPDATE `User` SET suspendedUntil = ? WHERE id = ?";
-      jdbcTemplate.update(banStatement, date, id);
-      return ResponseEntity.ok(Map.of("User banned until", date));
+      String hiddenStr = requestBody.get("isHidden");
+      Boolean hidden = (hiddenStr == "true" ? true : false);
+      String banStatement = "UPDATE `User` SET isHidden = ? WHERE id = ?";
+      jdbcTemplate.update(banStatement, hidden, id);
+      return ResponseEntity.ok(Map.of("User banned", hidden));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
