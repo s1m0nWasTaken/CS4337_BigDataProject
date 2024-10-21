@@ -77,7 +77,7 @@ public class UserService {
       User user = jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?",
                                               new UserRowMapper(), id);
 
-      return ResponseEntity.ok(Map.of("sucess", user));
+      return ResponseEntity.ok(Map.of("success", user));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", e.getMessage()));
@@ -129,7 +129,7 @@ public class UserService {
 
       int updatedRows =
           jdbcTemplate.update(updateStatement.toString(), params.toArray());
-      return ResponseEntity.ok(Map.of("sucess", String.valueOf(updatedRows)));
+      return ResponseEntity.ok(Map.of("success", String.valueOf(updatedRows)));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", e.getMessage()));
