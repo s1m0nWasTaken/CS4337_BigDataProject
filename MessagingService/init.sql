@@ -1,0 +1,14 @@
+USE messaging-service;
+CREATE TABLE IF NOT EXISTS `Messages` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+	chatid INT NOT NULL FOREIGN KEY,
+	senderid INT NOT NULL FOREIGN KEY,
+	createdAt datetime NOT NULL,
+	content TEXT
+);
+CREATE TABLE IF NOT EXISTS `ChatParticipants` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+	chatid INT NOT NULL FOREIGN KEY,
+	userid1 INT NOT NULL FOREIGN KEY,
+	userid2 INT NOT NULL FOREIGN KEY
+);
