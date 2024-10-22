@@ -23,4 +23,6 @@ jobs:
       run: ./gradlew build
 
     - name: Build the Messaging Service Docker image
-      run: docker build -t springbootdemo .
+      run: |
+        cd MessagingService
+        docker build -t springbootdemo .
