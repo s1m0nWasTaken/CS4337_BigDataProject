@@ -1,2 +1,3 @@
 rootProject.name = 'Project'
 include 'UserService'
+include 'MessagingService'
