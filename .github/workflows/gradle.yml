@@ -22,5 +22,5 @@ jobs:
     - name: Execute Gradle build
       run: ./gradlew build
 
-    - name: Build the Docker image
+    - name: Build the Messaging Service Docker image
       run: docker build -t springbootdemo .
