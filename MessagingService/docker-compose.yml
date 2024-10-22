@@ -4,32 +4,24 @@ services:
     container_name: userdb
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: user_service
+      MYSQL_DATABASE: messaging_service
     networks:
       - net
     ports:
       - "3306:3306"
     volumes:
-      - "./UserService/src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
-  java-app:
-    image: springbootdemo
-    container_name: project-app
+      - "./MessagingService/src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
+  messaging-service:
+    build:
+      dockerfile: Dockerfile
+    container_name: messaging-service
+    depends_on:
+      - mysql
     networks:
       - net
     ports:
       - "8080:8080"
-  user-service:
-    build:
-      context: UserService
-      dockerfile: Dockerfile
-    image: userservice
-    depends_on :
-      - mysql
-    container_name: user-service
-    networks:
-      - net
-    ports:
-      - "9090:9090"
 networks:
   net:
     driver: bridge
