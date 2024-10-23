@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: bandb
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: ban_service
+    networks:
+      - net
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+  user-service:
+    image: banservice
+    depends_on :
+      - mysql
+    container_name: ban-service
+    networks:
+      - net
+    ports:
+      - "9091:9091"
+networks:
+  net:
+    driver: bridge
