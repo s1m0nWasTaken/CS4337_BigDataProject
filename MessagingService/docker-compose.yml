@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:latest
-    container_name: userdb
+    container_name: messagingDB
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: messaging_service
@@ -10,11 +10,10 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - "./MessagingService/src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
 
   messaging-service:
-    build:
-      dockerfile: Dockerfile
+    build: .
     container_name: messaging-service
     depends_on:
       - mysql
