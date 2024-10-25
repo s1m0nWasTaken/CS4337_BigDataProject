@@ -15,7 +15,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class MessagingService {
 
-  @Autowired private JdbcTemplate jdbcTemplate;
+  private final ChatParticipantRepository chatParticipantRepository;
+  private final MessageRepository messageRepository;
+
+  @Autowired
+  public MessagingService(
+      ChatParticipantRepository chatParticipantRepository,
+      MessageRepository messageRepository,
+      JdbcTemplate jdbcTemplate) {
+    this.chatParticipantRepository = chatParticipantRepository;
+    this.messageRepository = messageRepository;
+  }
 
   public static void main(String[] args) {
     SpringApplication.run(MessagingService.class, args);
@@ -23,58 +33,36 @@ public class MessagingService {
 
   @GetMapping("/ChatParticipants")
   public ResponseEntity<Map<String, Object>> getChatParticipants() {
-    String sql = "SELECT * FROM ChatParticipants";
-    List<ChatParticipant> participants = jdbcTemplate.query(sql, new ChatParticipantRowMapper());
-
-    return ResponseEntity.ok(Map.of("success", participants));
+    try {
+      List<ChatParticipant> participants = chatParticipantRepository.getAllChatParticipant();
+      return ResponseEntity.ok(Map.of("success", participants));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "Database error: " + e.getMessage()));
+    }
   }
-
-  @GetMapping("/Messages")
-  public ResponseEntity<Map<String, Object>> getMessages() {
-    String sql = "SELECT * FROM Messages";
-    List<ChatParticipant> participants = jdbcTemplate.query(sql, new ChatParticipantRowMapper());
-
-    return ResponseEntity.ok(Map.of("success", participants));
-  }
-
-  // @PostMapping("/Messages")
-  // public Map<String, Object> sendMessage(@RequestBody User user) {
-  // }
-
-  // @DeleteMapping("/Messages")
-  // public Map<String, Object> removeMessage() {
-  // }
-
-  // @PatchMapping("/Messages")
-  // public Map<String, Object> editMessage() {
-  // }
 
   @PostMapping("/ChatParticipants")
   public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, Integer> users) {
     try {
-      // Validate input
       if (users == null || !users.containsKey("userid1") || !users.containsKey("userid2")) {
         return ResponseEntity.badRequest().body(Map.of("error", "User IDs are required."));
       }
 
-      Integer userId1 = users.get("userid1");
-      Integer userId2 = users.get("userid2");
+      Integer userid1 = users.get("userid1");
+      Integer userid2 = users.get("userid2");
 
-      // Ensure user IDs are not null
-      if (userId1 == null || userId2 == null) {
+      if (userid1 == null || userid2 == null) {
         return ResponseEntity.badRequest().body(Map.of("error", "User IDs cannot be null."));
       }
 
-      String sqlInsert = "INSERT INTO ChatParticipants (userid1, userid2) VALUES (?, ?);";
-
-      jdbcTemplate.update(sqlInsert, userId1, userId2);
-      return ResponseEntity.ok(Map.of("success", 1));
+      int result = chatParticipantRepository.addChatParticipant(userid1, userid2);
+      return ResponseEntity.ok(Map.of("success", result));
 
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", "Database error: " + e.getMessage()));
     } catch (Exception e) {
-      // Handle any other exceptions that might arise
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
     }
@@ -83,11 +71,8 @@ public class MessagingService {
   @DeleteMapping("/ChatParticipants/{chatid}")
   public ResponseEntity<Map<String, Object>> removeChat(@PathVariable("chatid") int chatid) {
     try {
-      // SQL statement to delete the chat participant by chatid
-      String sqlDelete = "DELETE FROM ChatParticipants WHERE chatid = ?;";
-      int rowsAffected = jdbcTemplate.update(sqlDelete, chatid);
 
-      // Check if any rows were affected
+      int rowsAffected = chatParticipantRepository.delChatParticipant(chatid);
       if (rowsAffected > 0) {
         return ResponseEntity.ok(
             Map.of("success", true, "message", "Chat participant removed successfully."));
@@ -99,6 +84,75 @@ public class MessagingService {
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("success", false, "error", e.getMessage()));
+    }
+  }
+
+  @GetMapping("/Messages")
+  public ResponseEntity<Map<String, Object>> getMessages() {
+    try {
+      List<Message> messages = messageRepository.getAllMessages();
+      return ResponseEntity.ok(Map.of("success", messages));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "Database error: " + e.getMessage()));
+    }
+  }
+
+  @PostMapping("/Messages")
+  public ResponseEntity<Map<String, Object>> sendMessage(
+      @RequestBody Map<String, Object> messageDetails) {
+    try {
+      Integer chatid = (Integer) messageDetails.get("chatid");
+      Integer senderid = (Integer) messageDetails.get("senderid");
+      String content = (String) messageDetails.get("content");
+
+      if (chatid == null || senderid == null || content == null) {
+        return ResponseEntity.badRequest()
+            .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
+      }
+
+      int result = messageRepository.addMessage(chatid, senderid, content);
+      return ResponseEntity.ok(
+          Map.of("success", "Message sent successfully", "message_id", result));
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
+    }
+  }
+
+  @DeleteMapping("/Messages/{chatid}")
+  public ResponseEntity<Map<String, Object>> removeMessage(@PathVariable int chatid) {
+    try {
+      int result = messageRepository.delMessage(chatid);
+      if (result > 0) {
+        return ResponseEntity.ok(
+            Map.of("success", true, "message", "Message deleted successfully."));
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of("success", false, "message", "Message not found."));
+      }
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("success", false, "error", e.getMessage()));
+    }
+  }
+
+  @PatchMapping("/Messages/{id}")
+  public ResponseEntity<Map<String, Object>> editMessage(
+      @PathVariable int id, @RequestParam String content) {
+    try {
+      int result = messageRepository.editMessage(id, content);
+      if (result > 0) {
+        return ResponseEntity.ok(
+            Map.of("success", true, "message", "Message updated successfully."));
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of("success", false, "message", "Message not found."));
+      }
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "Database error: " + e.getMessage()));
     }
   }
 }
