@@ -82,4 +82,9 @@ public class ShopItem {
     public void setCanUpdate(boolean canUpdate) {
         this.canUpdate = canUpdate;
     }
+
+    //Method for easily updating stock
+    public void updateStock(int amount){
+        setStock(getStock()-amount);
+    }
 }
