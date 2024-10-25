@@ -1,6 +1,5 @@
 rootProject.name = 'Project'
 include 'UserService'
 include 'MessagingService'
-include 'ShopService:ShopService'
-findProject(':ShopService:ShopService')?.name = 'ShopService'
+include 'ShopService'
 
