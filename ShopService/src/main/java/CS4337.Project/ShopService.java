@@ -1,12 +1,4 @@
-package java.CS4337.Project;
-
-import jakarta.websocket.server.PathParam;
-
-import java.util.List;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.Map;
+package CS4337.Project;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -15,10 +7,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 
 @SpringBootApplication
@@ -33,9 +25,9 @@ public class ShopService {
 
     @GetMapping("/shop")
     public List<Map<String, Object>> shop() {
-        List<Map<String, Object>> users;
+        List<Map<String, Object>> shops;
         try {
-            users = jdbcTemplate.queryForList("SELECT * FROM Shop");
+            shops = jdbcTemplate.queryForList("SELECT * FROM Shop");
         } catch (DataAccessException e) {
             jdbcTemplate.execute("USE user_service;");
             jdbcTemplate.execute(
@@ -47,12 +39,13 @@ public class ShopService {
                             + "description VARCHAR(255), "
                             + "shopType ENUM(CLOTHING, ELECTRONICS,FOOD, BOOKS, TOYS, OTHER) NOT NULL, "
                             + "shopEmail VARCHAR (255) NOT NULL);");
-            users = jdbcTemplate.queryForList(" SELECT * FROM Shop ");
+            shops = jdbcTemplate.queryForList(" SELECT * FROM Shop ");
         }
+        return shops;
     }
 
     @PostMapping("/shop")
-    public Map<String, Object> addShop(@RequestBody Shop shop) {#
+    public Map<String, Object> addShop(@RequestBody Shop shop) {
         //needs user access checking
         try {
             SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
@@ -74,9 +67,9 @@ public class ShopService {
 
     @GetMapping("/shopitem")
     public List<Map<String, Object>> shopItem() {
-        List<Map<String, Object>> users;
+        List<Map<String, Object>> shopItems;
         try {
-            users = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
+            shopItems = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
         } catch (DataAccessException e) {
             jdbcTemplate.execute("USE user_service;");
             jdbcTemplate.execute(
@@ -89,8 +82,9 @@ public class ShopService {
                             + "description VARCHAR(255), "
                             + "canUpdate BOOL DEFAULT TRUE, "
                             + "isHidden BOOL DEFAULT TRUE);");
-            users = jdbcTemplate.queryForList(" SELECT * FROM ShopItem ");
+            shopItems = jdbcTemplate.queryForList(" SELECT * FROM ShopItem ");
         }
+        return shopItems;
     }
 
     @PostMapping("/shopItem")

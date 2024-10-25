@@ -1,4 +1,4 @@
-package java.CS4337.Project;
+package CS4337.Project;
 
 enum ShopType {
     CLOTHING,
