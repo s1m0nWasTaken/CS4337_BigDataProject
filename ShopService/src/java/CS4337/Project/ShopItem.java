@@ -84,7 +84,7 @@ public class ShopItem {
     }
 
     //Method for easily updating stock
-    public void updateStock(int amount){
-        setStock(getStock()-amount);
+    public void updateStock(int amount) {
+        setStock(getStock() - amount);
     }
 }
