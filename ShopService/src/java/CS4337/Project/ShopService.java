@@ -52,7 +52,8 @@ public class ShopService {
     }
 
     @PostMapping("/shop")
-    public Map<String, Object> addShop(@RequestBody Shop shop) {
+    public Map<String, Object> addShop(@RequestBody Shop shop) {#
+        //needs user access checking
         try {
             SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
             String sqlInsert =
@@ -94,6 +95,7 @@ public class ShopService {
 
     @PostMapping("/shopItem")
     public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
+        //need to add user access checking
         try {
             SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
             String sqlInsert =
@@ -110,5 +112,94 @@ public class ShopService {
             return Map.of("error", e.getMessage());
         }
     }
+
+    @PutMapping("/shopItem/{id}")
+    public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
+        //need to add user access checking
+
+        String updateQuery = "UPDATE ShopItem SET price = ?, stock = ?, picture = ?, description = ? WHERE id = ?";
+
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    updateQuery,
+                    shopItem.getShopid(),
+                    shopItem.getPrice(),
+                    shopItem.getStock(),
+                    shopItem.getPicture(),
+                    shopItem.getDescription(),
+                    id
+            );
+
+            if (rowsAffected > 0) {
+                return Map.of("success", 1, "message", "Shop item updated successfully");
+            } else {
+                return Map.of("success", 0, "message", "Shop item not found");
+            }
+        } catch (DataAccessException e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
+    @PutMapping("/shop/{id}")
+    public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
+        //add checking for only shopOwnerId allocated to shop allowed to update shop
+        String updateQuery = "UPDATE Shop SET shopOwnerid = ?, shopName = ?, imageData = ?, description = ?, shopType = ?, shopEmail = ? WHERE id = ?";
+
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    updateQuery,
+                    shop.getShopOwnerid(),
+                    shop.getShopName(),
+                    shop.getImageData(),
+                    shop.getDescription(),
+                    shop.getShopType().name(),
+                    shop.getShopEmail(),
+                    id
+            );
+
+            if (rowsAffected > 0) {
+                return Map.of("success", 1, "message", "Shop updated successfully");
+            } else {
+                return Map.of("success", 0, "message", "Shop not found");
+            }
+        } catch (DataAccessException e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/shop/{id}")
+    public Map<String, Object> deleteShop(@PathVariable int id) {
+        String deleteQuery = "DELETE FROM Shop WHERE id = ?";
+
+        try {
+            int rowsAffected = jdbcTemplate.update(deleteQuery, id);
+
+            if (rowsAffected > 0) {
+                return Map.of("success", 1, "message", "Shop deleted successfully");
+            } else {
+                return Map.of("success", 0, "message", "Shop not found");
+            }
+        } catch (DataAccessException e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/shopItem/{id}")
+    public Map<String, Object> deleteShopItem(@PathVariable int id) {
+        String deleteQuery = "DELETE FROM ShopItem WHERE id = ?";
+
+        try {
+            int rowsAffected = jdbcTemplate.update(deleteQuery, id);
+
+            if (rowsAffected > 0) {
+                return Map.of("success", 1, "message", "Shop item deleted successfully");
+            } else {
+                return Map.of("success", 0, "message", "Shop item not found");
+            }
+        } catch (DataAccessException e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
 
 }
