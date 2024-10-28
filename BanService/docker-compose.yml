@@ -6,20 +6,21 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: ban_service
     networks:
-      - net
+      - netw
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
-  user-service:
+  ban-service:
     image: banservice
     depends_on :
       - mysql
     container_name: ban-service
     networks:
-      - net
+      - netw
     ports:
       - "9091:9091"
 networks:
-  net:
+  netw:
+    external: true
     driver: bridge

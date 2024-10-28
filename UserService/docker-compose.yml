@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: user_service
     networks:
-      - net
+      - netw
     ports:
       - "3306:3306"
     volumes:
@@ -17,9 +17,10 @@ services:
       - mysql
     container_name: user-service
     networks:
-      - net
+      - netw
     ports:
       - "9090:9090"
 networks:
-  net:
+  netw:
     driver: bridge
+    external: true
