@@ -155,7 +155,7 @@ public class BanService {
   public ResponseEntity<Map<String, Object>> banUser(@RequestBody ReqBan banInfo) {
     if (banInfo.getBanedId() == 0) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-              .body(Map.of("error", "0 is not a valid bannedId"));
+          .body(Map.of("error", "0 is not a valid bannedId"));
     }
     try {
       assert banInfo.getSuspendedUntil() != null;
@@ -196,7 +196,7 @@ public class BanService {
   public ResponseEntity<Map<String, Object>> banShop(@RequestBody ReqBan banInfo) {
     if (banInfo.getBanedId() == 0) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-              .body(Map.of("error", "0 is not a valid bannedId"));
+          .body(Map.of("error", "0 is not a valid bannedId"));
     }
     try {
       String sqlInsert =
