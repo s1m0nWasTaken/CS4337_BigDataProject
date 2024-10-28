@@ -8,7 +8,10 @@ import org.springframework.lang.NonNull;
 public class UserBanMapper implements RowMapper<UserBan> {
   @Override
   public UserBan mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
-    UserBan uBan = new UserBan(rs.getInt("id"), rs.getInt("userId"), rs.getDate("suspendedUntil"));
+    UserBan uBan =
+        new UserBan(
+            rs.getInt("id"), rs.getInt("userId"),
+            rs.getDate("suspendedUntil"), rs.getBoolean("isActive"));
     return uBan;
   }
 }

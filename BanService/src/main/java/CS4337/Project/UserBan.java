@@ -6,11 +6,13 @@ public class UserBan {
   private int id;
   private int userId;
   private Date suspendedUntil;
+  private Boolean isActive;
 
-  public UserBan(int id, int userId, Date suspendedUntil) {
+  public UserBan(int id, int userId, Date suspendedUntil, Boolean isActive) {
     this.id = id;
     this.userId = userId;
     this.suspendedUntil = suspendedUntil;
+    this.isActive = isActive;
   }
 
   public UserBan() {}
@@ -29,5 +31,13 @@ public class UserBan {
 
   public void setSuspendedUntil(Date suspendedUntil) {
     this.suspendedUntil = suspendedUntil;
+  }
+
+  public void setIsActive(boolean isActive) {
+    this.isActive = isActive;
+  }
+
+  public boolean getIsActive() {
+    return this.isActive;
   }
 }
