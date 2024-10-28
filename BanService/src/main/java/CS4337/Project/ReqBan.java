@@ -18,7 +18,7 @@ public class ReqBan {
     return banedId;
   }
 
-  public void setShopId(int shopId) {
-    this.banedId = shopId;
+  public void setBanedId(int banedId) {
+    this.banedId = banedId;
   }
 }

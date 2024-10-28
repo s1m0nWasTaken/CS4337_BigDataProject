@@ -11,7 +11,7 @@ ON `UserBan` (suspendedUntil);
 
 CREATE TABLE IF NOT EXISTS `ShopBan` (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    shopId INT,
+    shopItemId INT,
     suspendedUntil DATE,
     isActive TINYINT(1)
 );
