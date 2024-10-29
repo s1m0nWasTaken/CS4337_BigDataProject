@@ -30,6 +30,18 @@ services:
       - net
     ports:
       - "9090:9090"
+  auth-service:
+    build:
+      context: AuthService
+      dockerfile: Dockerfile
+    image: authservice
+    depends_on:
+      - mysql
+    container_name: auth-service
+    networks:
+      - net
+    ports:
+      - "8081:8081"
 networks:
   net:
     driver: bridge

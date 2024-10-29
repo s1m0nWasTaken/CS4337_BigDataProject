@@ -1,0 +1,13 @@
+services:
+  auth-service:
+    build:
+      dockerfile: Dockerfile
+    image: authservice
+    container_name: auth-service-app
+    networks:
+      - net
+    ports:
+      - "8081:8081"
+networks:
+  net:
+    driver: bridge
