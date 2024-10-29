@@ -45,3 +45,18 @@ services:
 networks:
   net:
     driver: bridge
+
+    shop-service:
+      build:
+        context: ShopService
+        dockerfile: Dockerfile
+      depends_on:
+        - mysql
+      container_name: shop-service
+      networks:
+        - net
+      ports:
+        - "8080:8080"
+    networks:
+      net:
+        driver: bridge
