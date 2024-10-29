@@ -21,21 +21,22 @@ public class AuthController {
       @RequestParam("authuser") String authUser,
       @RequestParam("prompt") String prompt) {
 
-      String accessToken = authService.getOauthAccessTokenGoogle(code);
-      GoogleUserInfo googleUserInfo = authService.getUserInfoFromGoogle(accessToken);
+    String accessToken = authService.getOauthAccessTokenGoogle(code);
+    GoogleUserInfo googleUserInfo = authService.getUserInfoFromGoogle(accessToken);
 
-      if (!authService.userExistsByEmail(googleUserInfo.getEmail())) {
-        User user = authService.createUserFromGoogleUserInfo(googleUserInfo);
-        String registerResponse = authService.registerUser(user);
+    if (!authService.userExistsByEmail(googleUserInfo.getEmail())) {
+      User user = authService.createUserFromGoogleUserInfo(googleUserInfo);
+      String registerResponse = authService.registerUser(user);
 
-        if (registerResponse.contains("success")) {
-          return ResponseEntity.status(HttpStatus.CREATED).body("User registration successful");
-        } else {
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User registration failed: " + registerResponse);
-        }
-
+      if (registerResponse.contains("success")) {
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registration successful");
       } else {
-        return ResponseEntity.status(HttpStatus.OK).body("Login successful");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body("User registration failed: " + registerResponse);
       }
+
+    } else {
+      return ResponseEntity.status(HttpStatus.OK).body("Login successful");
+    }
   }
 }
