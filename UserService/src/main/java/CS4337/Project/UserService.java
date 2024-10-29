@@ -71,11 +71,12 @@ public class UserService {
     }
   }
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<Map<String, Object>> getUser(@PathVariable("id") int id) {
+  @GetMapping("/user/{email}")
+  public ResponseEntity<Map<String, Object>> getUserByEmail(@PathVariable("email") String email) {
     try {
       User user =
-          jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?", new UserRowMapper(), id);
+          jdbcTemplate.queryForObject(
+              "SELECT * FROM User WHERE email = ?", new UserRowMapper(), email);
 
       return ResponseEntity.ok(Map.of("success", user));
     } catch (DataAccessException e) {
