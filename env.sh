@@ -21,5 +21,11 @@ for TARGET_DIR in "${TARGET_DIRS[@]}"; do
         echo "USER_CONTAINER=user-service"
         echo "USER_MYSQL_HOST_PORT=3306"
         echo "USER_MYSQL_CONTAINER_PORT=3306"
+        echo "#shop service"
+        echo "SHOP_HOST_PORT=8080"
+        echo "SHOP_CONTAINER_PORT=8080"
+        echo "SHOP_CONTAINER=shop-service"
+        echo "SHOP_MYSQL_HOST_PORT=3308"
+        echo "SHOP_MYSQL_CONTAINER_PORT=3306"
     } > "$SCRIPT_DIR/$TARGET_DIR/.env"
 done
