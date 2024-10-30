@@ -1,16 +1,16 @@
 services:
-#  mysql:
-#    image: mysql:latest
-#    container_name: authdb
-#    environment:
-#      MYSQL_ROOT_PASSWORD: 1234
-#      MYSQL_DATABASE: auth_service
-#    networks:
-#      - net
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+  mysql:
+    image: mysql:latest
+    container_name: authdb
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: auth
+    networks:
+      - net
+    ports:
+      - "3307:3307"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
 
   auth-service:
     build:
@@ -21,8 +21,8 @@ services:
       - net
     ports:
       - "8081:8081"
-#    depends_on:
-#      - mysql
+    depends_on:
+      - mysql
 
 networks:
   net:
