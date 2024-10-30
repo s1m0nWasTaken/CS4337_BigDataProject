@@ -1,9 +1,9 @@
 package CS4337.Project;
 
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 public class AuthController {
@@ -21,7 +21,7 @@ public class AuthController {
       @RequestParam("authuser") String authUser,
       @RequestParam("prompt") String prompt) {
 
-    String accessToken = authService.getOauthAccessTokenGoogle(code);
+    String accessToken = authService.getOauthAccessTokenGoogle(code); // maybe return entire response instead
     GoogleUserInfo googleUserInfo = authService.getUserInfoFromGoogle(accessToken);
 
     if (!authService.userExistsByEmail(googleUserInfo.getEmail())) {
@@ -37,6 +37,22 @@ public class AuthController {
 
     } else {
       return ResponseEntity.status(HttpStatus.OK).body("Login successful");
+    }
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> request) {
+    String refreshToken = request.get("refresh_token");
+
+    int userId = authService.getUserIdByRefreshToken(refreshToken);
+    if (userId == -1) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token not found");
+    }
+
+    if (authService.refreshTokens(refreshToken, userId)) {
+      return ResponseEntity.status(HttpStatus.OK).body("Tokens refreshed successfully");
+    } else {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to refresh tokens");
     }
   }
 }

@@ -71,6 +71,18 @@ public class UserService {
     }
   }
 
+  @GetMapping("/user/{id}")
+  public ResponseEntity<Map<String, Object>> getUser(@PathVariable("id") int id) {
+    try {
+      User user =
+              jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?", new UserRowMapper(), id);
+
+      return ResponseEntity.ok(Map.of("success", user));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @GetMapping("/user/{email}")
   public ResponseEntity<Map<String, Object>> getUserByEmail(@PathVariable("email") String email) {
     try {
