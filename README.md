@@ -2,7 +2,7 @@
 Project for Module CS4337 'Big Data Management and Security'. 
 
 Contributors :
-  -  Alex Butler 
+  -  Alex Butler(21338787)
   -  Mohd Humayun
   -  Honglin Li
   -  Bayan Nezamabad

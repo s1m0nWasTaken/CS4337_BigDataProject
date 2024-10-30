@@ -1,0 +1,12 @@
+services:
+  config-service:
+    image: configservice
+    container_name: config-service
+    networks:
+      - netw
+    ports:
+      - "8888:8888"
+networks:
+  netw:
+    driver: bridge
+    external: true

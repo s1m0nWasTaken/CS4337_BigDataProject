@@ -18,18 +18,26 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+ext {
+    set('springCloudVersion', "2023.0.3")
+}
+
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.apache.groovy:groovy'
+    implementation 'org.springframework.cloud:spring-cloud-config-server'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'mysql:mysql-connector-java:8.0.33'
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.3"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 
@@ -39,8 +47,10 @@ tasks.named('test') {
 
 spotless {
     format 'misc', {
+        // define the files to apply `misc` to
         target '*.gradle', '.gitattributes', '.gitignore'
 
+        // define the steps to apply to those files
         trimTrailingWhitespace()
         indentWithSpaces()
         endWithNewline()
