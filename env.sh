@@ -1,22 +1,17 @@
 #!/bin/bash
-TARGET_DIRS=("UserService" "ShopService" "MessagingService" "BanService")
-
-#NB!! remember to make the external network(nessesary to let container http eachother):
-#`docker network create netw`
-    #export NETWORK_NAME=netw
-    #user service
-    #export USER_HOST_PORT=9090
-    #export USER_CONTAINER_PORT=9090
-    #export USER_CONTAINER=user-service
-    #export USER_MYSQL_HOST_PORT=3306
-    #export USER_MYSQL_CONTAINER_PORT=3306
-
+TARGET_DIRS=("UserService" "ShopService" "MessagingService" "BanService" "ConfigService")
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 #build with `docker build -t msgservice .` idk why otherwise env vars dont work
 for TARGET_DIR in "${TARGET_DIRS[@]}"; do
     touch $SCRIPT_DIR/$TARGET_DIR/.env
     {
+        echo "export ENV=dev"
+        echo "export USER_NAME=root"
+        echo "export USER_PSWD=1234"
         echo "export NETWORK_NAME=netw"
+        echo "#config service"
+        echo "export CNFG_HOST_PORT=8888"
+        echo "export CNFG_CONTAINER_PORT=8888"
         echo "#user service"
         echo "export USER_HOST_PORT=9090"
         echo "export USER_CONTAINER_PORT=9090"

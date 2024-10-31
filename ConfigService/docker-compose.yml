@@ -3,9 +3,11 @@ services:
     image: configservice
     container_name: config-service
     networks:
-      - netw
+      - ${NETWORK_NAME}
     ports:
-      - "8888:8888"
+      - "${CNFG_HOST_PORT}:${CNFG_HOST_PORT}"
+    env_file:
+     - .env
 networks:
   netw:
     driver: bridge
