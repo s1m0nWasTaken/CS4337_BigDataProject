@@ -5,7 +5,7 @@ services:
     networks:
       - ${NETWORK_NAME}
     ports:
-      - "${CNFG_HOST_PORT}:${CNFG_HOST_PORT}"
+      - "${CNFG_SERVER_PORT}:${CNFG_CONTAINER_PORT}"
     env_file:
      - .env
 networks:

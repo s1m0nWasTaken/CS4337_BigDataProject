@@ -7,7 +7,7 @@ services:
     networks:
       - ${NETWORK_NAME}
     ports:
-      - "${SHOP_MYSQL_HOST_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
+      - "${SHOP_MYSQL_SERVER_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
   shop-service:
     image: shopservice
     depends_on:
@@ -16,7 +16,7 @@ services:
     networks:
       - ${NETWORK_NAME}
     ports:
-      - "${SHOP_HOST_PORT}:${SHOP_CONTAINER_PORT}"
+      - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
     env_file:
       - .env
 networks:

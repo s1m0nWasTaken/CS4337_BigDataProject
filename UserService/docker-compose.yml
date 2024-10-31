@@ -8,7 +8,7 @@ services:
     networks:
       - ${NETWORK_NAME}
     ports:
-      - "${USER_MYSQL_HOST_PORT}:${USER_MYSQL_CONTAINER_PORT}"
+      - "${USER_MYSQL_SERVER_PORT}:${USER_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
   user-service:
@@ -19,7 +19,7 @@ services:
     networks:
       - ${NETWORK_NAME}
     ports:
-      - "${USER_HOST_PORT}:${USER_CONTAINER_PORT}"
+      - "${USER_SERVER_PORT}:${USER_CONTAINER_PORT}"
     env_file:
       - .env
 networks:
