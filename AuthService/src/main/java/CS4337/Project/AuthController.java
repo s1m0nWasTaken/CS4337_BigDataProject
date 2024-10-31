@@ -17,7 +17,8 @@ public class AuthController {
     this.authRepository = authRepository;
   }
 
-  // https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8081/grantcode&response_type=code&client_id=529138320852-h26t99u2jh694u7q3u3c2oaqma07oabe.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&access_type=offline
+  // Use the below link to login via Google OAuth
+  // https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8081/grantcode&response_type=code&client_id=529138320852-h26t99u2jh694u7q3u3c2oaqma07oabe.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&access_type=offline&prompt=consent
   @GetMapping("/grantcode")
   public ResponseEntity<String> grantCode(
       @RequestParam("code") String code,
@@ -57,12 +58,12 @@ public class AuthController {
     int userId = authRepository.getUserIdByRefreshToken(refreshToken);
     if (userId == -1) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body("Refresh token expired or not found");
+          .body("Refresh token expired or not found, authentication required");
     }
 
     GoogleTokenInfo newTokenInfo = authService.refreshTokens(refreshToken);
 
-    if (authRepository.updateTokens(newTokenInfo, userId) > 0) {
+    if (authRepository.updateAccessToken(newTokenInfo, userId) > 0) {
       return ResponseEntity.status(HttpStatus.OK).body("Tokens refreshed successfully");
     } else {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -38,6 +38,16 @@ public class AuthRepository {
         sql, accessToken, accessTokenExpiry, refreshToken, refreshTokenExpiry, userId);
   }
 
+  public int updateAccessToken(GoogleTokenInfo tokenInfo, int userId) {
+    LocalDateTime now = LocalDateTime.now();
+    String accessToken = tokenInfo.getAccessToken();
+    Timestamp accessTokenExpiry = Timestamp.valueOf(now.plusSeconds(tokenInfo.getExpiresIn()));
+
+    String sql = "UPDATE Auth SET accessToken = ?, accessTokenExpiry = ? WHERE userId = ?";
+
+    return jdbcTemplate.update(sql, accessToken, accessTokenExpiry, userId);
+  }
+
   public int addTokens(GoogleTokenInfo tokenInfo, int userId) {
     LocalDateTime now = LocalDateTime.now();
     String accessToken = tokenInfo.getAccessToken();

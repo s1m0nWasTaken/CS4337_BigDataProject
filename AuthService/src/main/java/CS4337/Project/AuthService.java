@@ -90,7 +90,7 @@ public class AuthService {
 
     user.setEmail(googleUserInfo.getEmail());
     user.setUsername(googleUserInfo.getName());
-    user.setUserType(UserType.customer); // todo: make this so we can register other types of user
+    user.setUserType(UserType.customer); // todo: figure out how to register different types of user
     user.setHidden(false);
 
     return user;
@@ -111,7 +111,7 @@ public class AuthService {
     params.add("client_id", clientId);
     params.add("client_secret", clientSecret);
     params.add("refresh_token", refreshToken);
-    params.add("grant_type", "authorization_code");
+    params.add("grant_type", "refresh_token");
 
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
