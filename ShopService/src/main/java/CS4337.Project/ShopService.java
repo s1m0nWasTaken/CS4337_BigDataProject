@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
@@ -21,24 +23,14 @@ public class ShopService {
   }
 
   @GetMapping("/shop")
-  public List<Map<String, Object>> shop() {
+  public ResponseEntity<Map<String, Object>> shop() {
     List<Map<String, Object>> shops;
     try {
       shops = jdbcTemplate.queryForList("SELECT * FROM Shop");
     } catch (DataAccessException e) {
-      jdbcTemplate.execute("USE user_service;");
-      jdbcTemplate.execute(
-          "CREATE TABLE `ShopItem` ("
-              + "id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "shopOwnerid INT NOT NULL, "
-              + "shopName VARCHAR(255) NOT NULL, "
-              + "imageData VARCHAR(255), "
-              + "description VARCHAR(255), "
-              + "shopType ENUM(CLOTHING, ELECTRONICS,FOOD, BOOKS, TOYS, OTHER) NOT NULL, "
-              + "shopEmail VARCHAR (255) NOT NULL);");
-      shops = jdbcTemplate.queryForList(" SELECT * FROM Shop ");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return shops;
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shops));
   }
 
   @PostMapping("/shop")
@@ -63,26 +55,15 @@ public class ShopService {
     }
   }
 
-  @GetMapping("/shopitem")
-  public List<Map<String, Object>> shopItem() {
+  @GetMapping("/shopItem")
+  public ResponseEntity<Map<String, Object>> shopItem() {
     List<Map<String, Object>> shopItems;
     try {
       shopItems = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
     } catch (DataAccessException e) {
-      jdbcTemplate.execute("USE user_service;");
-      jdbcTemplate.execute(
-          "CREATE TABLE `ShopItem` ("
-              + "id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "shopid INT NOT NULL, "
-              + "price DOUBLE(10, 2), "
-              + "stock INT NOT NULL"
-              + "picture VARCHAR(255), "
-              + "description VARCHAR(255), "
-              + "canUpdate BOOL DEFAULT TRUE, "
-              + "isHidden BOOL DEFAULT TRUE);");
-      shopItems = jdbcTemplate.queryForList(" SELECT * FROM ShopItem ");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return shopItems;
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
   }
 
   @PostMapping("/shopItem")
