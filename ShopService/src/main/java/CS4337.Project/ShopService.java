@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class ShopService {
     try {
       SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
-          "INSERT INTO 'Shop' (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
+          "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
               + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
           sqlInsert,
@@ -72,12 +73,13 @@ public class ShopService {
     try {
       SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
-          "INSERT INTO 'ShopItem' (shopid, price, stock, picture, description) "
-              + "VALUES (?, ?, ?, ?, ?)";
+          "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
+              + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
           sqlInsert,
           shopItem.getShopid(),
           shopItem.getPrice(),
+          shopItem.getItemName(),
           shopItem.getStock(),
           shopItem.getPicture(),
           shopItem.getDescription());
@@ -91,19 +93,40 @@ public class ShopService {
   public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
     // need to add user access checking
 
-    String updateQuery =
-        "UPDATE ShopItem SET price = ?, stock = ?, picture = ?, description = ? WHERE id = ?";
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("UPDATE ShopItem SET ");
+
+    if (shopItem.getPrice() != -1) {
+      sql.append("price = ?, ");
+      params.add(shopItem.getPrice());
+    }
+
+    if (shopItem.getItemName() != null) {
+      sql.append("itemName = ?, ");
+      params.add(shopItem.getItemName());
+    }
+
+    if (shopItem.getStock() != -1) {
+      sql.append("stock = ?, ");
+      params.add(shopItem.getStock());
+    }
+
+    if (shopItem.getPicture() != null) {
+      sql.append("picture = ?, ");
+      params.add(shopItem.getPicture());
+    }
+
+    if (shopItem.getDescription() != null) {
+      sql.append("description = ?, ");
+      params.add(shopItem.getDescription());
+    }
+
+    sql.setLength(sql.length() - 2);
+    sql.append(" WHERE id = ?");
+    params.add(id);
 
     try {
-      int rowsAffected =
-          jdbcTemplate.update(
-              updateQuery,
-              shopItem.getShopid(),
-              shopItem.getPrice(),
-              shopItem.getStock(),
-              shopItem.getPicture(),
-              shopItem.getDescription(),
-              id);
+      int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
 
       if (rowsAffected > 0) {
         return Map.of("success", 1, "message", "Shop item updated successfully");
@@ -118,20 +141,46 @@ public class ShopService {
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
     // add checking for only shopOwnerId allocated to shop allowed to update shop
-    String updateQuery =
-        "UPDATE Shop SET shopOwnerid = ?, shopName = ?, imageData = ?, description = ?, shopType = ?, shopEmail = ? WHERE id = ?";
+
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("UPDATE Shop SET ");
+
+    if (shop.getShopOwnerid() != -1) {
+      sql.append("shopOwnerid = ?, ");
+      params.add(shop.getShopOwnerid());
+    }
+
+    if (shop.getShopName() != null) {
+      sql.append("shopName = ?, ");
+      params.add(shop.getShopName());
+    }
+
+    if (shop.getImageData() != null) {
+      sql.append("imageData = ?, ");
+      params.add(shop.getImageData());
+    }
+
+    if (shop.getDescription() != null) {
+      sql.append("description = ?, ");
+      params.add(shop.getDescription());
+    }
+
+    if (shop.getShopType() != null) {
+      sql.append("shopType = ?, ");
+      params.add(shop.getShopType().name());
+    }
+
+    if (shop.getShopEmail() != null) {
+      sql.append("shopEmail = ?, ");
+      params.add(shop.getShopEmail());
+    }
+
+    sql.setLength(sql.length() - 2);
+    sql.append(" WHERE id = ?");
+    params.add(id);
 
     try {
-      int rowsAffected =
-          jdbcTemplate.update(
-              updateQuery,
-              shop.getShopOwnerid(),
-              shop.getShopName(),
-              shop.getImageData(),
-              shop.getDescription(),
-              shop.getShopType().name(),
-              shop.getShopEmail(),
-              id);
+      int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
 
       if (rowsAffected > 0) {
         return Map.of("success", 1, "message", "Shop updated successfully");
