@@ -11,7 +11,6 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
 @SpringBootApplication
@@ -38,7 +37,6 @@ public class ShopService {
   public Map<String, Object> addShop(@RequestBody Shop shop) {
     // needs user access checking
     try {
-      SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
           "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
               + "VALUES (?, ?, ?, ?, ?, ?)";
@@ -71,7 +69,6 @@ public class ShopService {
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
     // need to add user access checking
     try {
-      SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
           "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
               + "VALUES (?, ?, ?, ?, ?, ?)";
