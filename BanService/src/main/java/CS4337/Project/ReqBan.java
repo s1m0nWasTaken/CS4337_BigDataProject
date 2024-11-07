@@ -6,13 +6,19 @@ public class ReqBan {
   private int bannedId;
   private Date suspendedUntil;
 
-  public Date getSuspendedUntil() { return suspendedUntil; }
+  public Date getSuspendedUntil() {
+    return suspendedUntil;
+  }
 
   public void setSuspendedUntil(Date suspendedUntil) {
     this.suspendedUntil = suspendedUntil;
   }
 
-  public int getBannedId() { return bannedId; }
+  public int getBannedId() {
+    return bannedId;
+  }
 
-  public void setBannedId(int bannedId) { this.bannedId = bannedId; }
+  public void setBannedId(int bannedId) {
+    this.bannedId = bannedId;
+  }
 }
