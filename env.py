@@ -42,7 +42,6 @@ response_content = response.read().decode()
 
 data = json.loads(response_content)
 conn.close()
-result = subprocess.run("sudo docker stop 17b477c6465a", shell=True, capture_output=True, text=True)
 
 #turn the vars into usable env vars
 def generate_env_vars(data):
@@ -114,3 +113,5 @@ for target_dir in target_dirs:
     
     with open(env_path, "w") as env_file:
         env_file.write(env_vars)
+
+print(f".envs made")
