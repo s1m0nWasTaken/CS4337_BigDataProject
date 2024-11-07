@@ -31,5 +31,11 @@ for TARGET_DIR in "${TARGET_DIRS[@]}"; do
         echo "export MSG_CONTAINER=messaging-service"
         echo "export MSG_MYSQL_SERVER_PORT=3308"
         echo "export MSG_MYSQL_CONTAINER_PORT=3306"
+        echo "#ban service"
+        echo "export BAN_SERVER_PORT=9091"
+        echo "export BAN_CONTAINER_PORT=9091"
+        echo "export BAN_CONTAINER=ban-service"
+        echo "export BAN_MYSQL_SERVER_PORT=3307"
+        echo "export BAN_MYSQL_CONTAINER_PORT=3306"
     } > "$SCRIPT_DIR/$TARGET_DIR/.env"
 done
