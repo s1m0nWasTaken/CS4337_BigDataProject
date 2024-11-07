@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `UserBan` (
 CREATE INDEX user_ban_date_index
 ON `UserBan` (suspendedUntil);
 
-CREATE TABLE IF NOT EXISTS `ShopBan` (
+CREATE TABLE IF NOT EXISTS `ShopItemBan` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shopItemId INT,
     suspendedUntil DATE,
@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS `ShopBan` (
 );
 
 CREATE INDEX shop_ban_date_index
-ON `ShopBan` (suspendedUntil);
+ON `ShopItemBan` (suspendedUntil);
