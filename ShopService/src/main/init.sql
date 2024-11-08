@@ -17,4 +17,5 @@ CREATE TABLE IF NOT EXISTS `ShopItem` (
     picture VARCHAR(255),
     description VARCHAR(255),
     isHidden BOOL DEFAULT FALSE,
-    canUpdate BOOL DEFAULT TRUE);
+    canUpdate BOOL DEFAULT TRUE,
+    FOREIGN KEY (shopid) REFERENCES Shop(id) ON DELETE No Action);

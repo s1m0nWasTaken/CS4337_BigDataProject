@@ -24,6 +24,13 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.3"
+    }
 }
 
 tasks.named('test') {
@@ -32,10 +39,8 @@ tasks.named('test') {
 
 spotless {
     format 'misc', {
-        // define the files to apply `misc` to
         target '*.gradle', '.gitattributes', '.gitignore'
 
-        // define the steps to apply to those files
         trimTrailingWhitespace()
         indentWithSpaces()
         endWithNewline()

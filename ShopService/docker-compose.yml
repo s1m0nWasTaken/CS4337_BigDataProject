@@ -6,24 +6,23 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: shop_service
     networks:
-      - net
+      - ${NETWORK_NAME}
     ports:
-      - "3306:3306"
+      - "${SHOP_MYSQL_SERVER_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
-
   shop-service:
-    build:
-      dockerfile: Dockerfile
     image: shopservice
     depends_on:
       - mysql
-    container_name: shop-service
+    container_name: ${SHOP_CONTAINER}
     networks:
-      - net
+      - ${NETWORK_NAME}
     ports:
-      - "8080:8080"
-
+      - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
+    env_file:
+      - .env
 networks:
-  net:
+  netw:
     driver: bridge
+    external: true
