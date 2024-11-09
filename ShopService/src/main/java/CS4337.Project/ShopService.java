@@ -23,14 +23,49 @@ public class ShopService {
   }
 
   @GetMapping("/shop")
-  public ResponseEntity<Map<String, Object>> shop() {
-    List<Map<String, Object>> shops;
+  public ResponseEntity<Map<String, Object>> shop(
+          @RequestParam(required = false) String shopName,
+          @RequestParam(required = false) String description,
+          @RequestParam(required = false) Integer id,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = maxItemsShown;
+    }
+
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("SELECT * FROM Shop WHERE 1=1");
+
+    if (shopName != null && !shopName.isEmpty()) {
+      sql.append(" AND shopName LIKE ?");
+      params.add("%" + shopName + "%");
+    }
+
+    if (description != null && !description.isEmpty()) {
+      sql.append(" AND description LIKE ?");
+      params.add("%" + description + "%");
+    }
+
+    if (id!=null){
+      sql.append(" AND id = ?");
+      params.add(+id);
+    }
+
+    sql.append(" LIMIT ?");
+    params.add(pageSize);
+
+    sql.append(" OFFSET ?");
+    params.add(page * pageSize);
+
     try {
-      shops = jdbcTemplate.queryForList("SELECT * FROM Shop");
+      List<Map<String, Object>> shops = jdbcTemplate.queryForList(sql.toString(), params.toArray());
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shops));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shops));
   }
 
   @PostMapping("/shop")
@@ -61,15 +96,15 @@ public class ShopService {
           @RequestParam(required = false) Double minPrice,
           @RequestParam(required = false) Double maxPrice,
           @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "5") int pageSize) {
+          @RequestParam(defaultValue = "50") int pageSize) {
 
-//    // Set maxItemsShown to limit the max number of items shown
-//    int maxItemsShown = 5;
-//
-//    // Ensure pageSize does not exceed the maxItemsShown
-//    if (pageSize > maxItemsShown) {
-//      pageSize = maxItemsShown;
-//    }
+    // Set maxItemsShown to limit the max number of items shown
+    int maxItemsShown = 50;
+
+    // Ensure pageSize does not exceed the maxItemsShown
+    if (pageSize > maxItemsShown) {
+      pageSize = maxItemsShown;
+    }
 
     List<Object> params = new ArrayList<>();
     StringBuilder sql = new StringBuilder("SELECT * FROM ShopItem WHERE 1=1");
