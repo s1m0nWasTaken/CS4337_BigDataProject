@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
 @SpringBootApplication
@@ -21,33 +23,22 @@ public class ShopService {
   }
 
   @GetMapping("/shop")
-  public List<Map<String, Object>> shop() {
+  public ResponseEntity<Map<String, Object>> shop() {
     List<Map<String, Object>> shops;
     try {
       shops = jdbcTemplate.queryForList("SELECT * FROM Shop");
     } catch (DataAccessException e) {
-      jdbcTemplate.execute("USE user_service;");
-      jdbcTemplate.execute(
-          "CREATE TABLE `ShopItem` ("
-              + "id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "shopOwnerid INT NOT NULL, "
-              + "shopName VARCHAR(255) NOT NULL, "
-              + "imageData VARCHAR(255), "
-              + "description VARCHAR(255), "
-              + "shopType ENUM(CLOTHING, ELECTRONICS,FOOD, BOOKS, TOYS, OTHER) NOT NULL, "
-              + "shopEmail VARCHAR (255) NOT NULL);");
-      shops = jdbcTemplate.queryForList(" SELECT * FROM Shop ");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return shops;
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shops));
   }
 
   @PostMapping("/shop")
   public Map<String, Object> addShop(@RequestBody Shop shop) {
     // needs user access checking
     try {
-      SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
-          "INSERT INTO 'Shop' (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
+          "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
               + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
           sqlInsert,
@@ -63,40 +54,29 @@ public class ShopService {
     }
   }
 
-  @GetMapping("/shopitem")
-  public List<Map<String, Object>> shopItem() {
+  @GetMapping("/shopItem")
+  public ResponseEntity<Map<String, Object>> shopItem() {
     List<Map<String, Object>> shopItems;
     try {
       shopItems = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
     } catch (DataAccessException e) {
-      jdbcTemplate.execute("USE user_service;");
-      jdbcTemplate.execute(
-          "CREATE TABLE `ShopItem` ("
-              + "id INT AUTO_INCREMENT PRIMARY KEY, "
-              + "shopid INT NOT NULL, "
-              + "price DOUBLE(10, 2), "
-              + "stock INT NOT NULL"
-              + "picture VARCHAR(255), "
-              + "description VARCHAR(255), "
-              + "canUpdate BOOL DEFAULT TRUE, "
-              + "isHidden BOOL DEFAULT TRUE);");
-      shopItems = jdbcTemplate.queryForList(" SELECT * FROM ShopItem ");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return shopItems;
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
   }
 
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
     // need to add user access checking
     try {
-      SimpleJdbcInsert inserter = new SimpleJdbcInsert(jdbcTemplate);
       String sqlInsert =
-          "INSERT INTO 'ShopItem' (shopid, price, stock, picture, description) "
-              + "VALUES (?, ?, ?, ?, ?)";
+          "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
+              + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
           sqlInsert,
           shopItem.getShopid(),
           shopItem.getPrice(),
+          shopItem.getItemName(),
           shopItem.getStock(),
           shopItem.getPicture(),
           shopItem.getDescription());
@@ -110,19 +90,40 @@ public class ShopService {
   public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
     // need to add user access checking
 
-    String updateQuery =
-        "UPDATE ShopItem SET price = ?, stock = ?, picture = ?, description = ? WHERE id = ?";
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("UPDATE ShopItem SET ");
+
+    if (shopItem.getPrice() != -1) {
+      sql.append("price = ?, ");
+      params.add(shopItem.getPrice());
+    }
+
+    if (shopItem.getItemName() != null) {
+      sql.append("itemName = ?, ");
+      params.add(shopItem.getItemName());
+    }
+
+    if (shopItem.getStock() != -1) {
+      sql.append("stock = ?, ");
+      params.add(shopItem.getStock());
+    }
+
+    if (shopItem.getPicture() != null) {
+      sql.append("picture = ?, ");
+      params.add(shopItem.getPicture());
+    }
+
+    if (shopItem.getDescription() != null) {
+      sql.append("description = ?, ");
+      params.add(shopItem.getDescription());
+    }
+
+    sql.setLength(sql.length() - 2);
+    sql.append(" WHERE id = ?");
+    params.add(id);
 
     try {
-      int rowsAffected =
-          jdbcTemplate.update(
-              updateQuery,
-              shopItem.getShopid(),
-              shopItem.getPrice(),
-              shopItem.getStock(),
-              shopItem.getPicture(),
-              shopItem.getDescription(),
-              id);
+      int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
 
       if (rowsAffected > 0) {
         return Map.of("success", 1, "message", "Shop item updated successfully");
@@ -137,20 +138,46 @@ public class ShopService {
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
     // add checking for only shopOwnerId allocated to shop allowed to update shop
-    String updateQuery =
-        "UPDATE Shop SET shopOwnerid = ?, shopName = ?, imageData = ?, description = ?, shopType = ?, shopEmail = ? WHERE id = ?";
+
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("UPDATE Shop SET ");
+
+    if (shop.getShopOwnerid() != -1) {
+      sql.append("shopOwnerid = ?, ");
+      params.add(shop.getShopOwnerid());
+    }
+
+    if (shop.getShopName() != null) {
+      sql.append("shopName = ?, ");
+      params.add(shop.getShopName());
+    }
+
+    if (shop.getImageData() != null) {
+      sql.append("imageData = ?, ");
+      params.add(shop.getImageData());
+    }
+
+    if (shop.getDescription() != null) {
+      sql.append("description = ?, ");
+      params.add(shop.getDescription());
+    }
+
+    if (shop.getShopType() != null) {
+      sql.append("shopType = ?, ");
+      params.add(shop.getShopType().name());
+    }
+
+    if (shop.getShopEmail() != null) {
+      sql.append("shopEmail = ?, ");
+      params.add(shop.getShopEmail());
+    }
+
+    sql.setLength(sql.length() - 2);
+    sql.append(" WHERE id = ?");
+    params.add(id);
 
     try {
-      int rowsAffected =
-          jdbcTemplate.update(
-              updateQuery,
-              shop.getShopOwnerid(),
-              shop.getShopName(),
-              shop.getImageData(),
-              shop.getDescription(),
-              shop.getShopType().name(),
-              shop.getShopEmail(),
-              id);
+      int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
 
       if (rowsAffected > 0) {
         return Map.of("success", 1, "message", "Shop updated successfully");

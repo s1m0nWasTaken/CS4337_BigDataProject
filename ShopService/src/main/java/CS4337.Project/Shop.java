@@ -11,7 +11,7 @@ enum ShopType {
 
 public class Shop {
   private int id;
-  private int shopOwnerid;
+  private int shopOwnerid = -1;
   private String shopName;
   private String description;
   private String imageData;
