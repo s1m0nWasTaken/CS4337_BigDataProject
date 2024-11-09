@@ -1,50 +1,25 @@
 services:
   mysql:
     image: mysql:latest
-    container_name: userdb
+    container_name: shopdb
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: user_service
     networks:
-      - net
+      - ${NETWORK_NAME}
     ports:
-      - "3306:3306"
-    volumes:
-      - "./UserService/src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
-  java-app:
-    image: springbootdemo
-    container_name: project-app
-    networks:
-      - net
-    ports:
-      - "8080:8080"
-  user-service:
-    build:
-      context: UserService
-      dockerfile: Dockerfile
-    image: userservice
-    depends_on :
+      - "${SHOP_MYSQL_SERVER_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
+  shop-service:
+    image: shopservice
+    depends_on:
       - mysql
-    container_name: user-service
+    container_name: ${SHOP_CONTAINER}
     networks:
-      - net
+      - ${NETWORK_NAME}
     ports:
-      - "9090:9090"
+      - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
+    env_file:
+      - .env
 networks:
-  net:
+  netw:
     driver: bridge
-
-    shop-service:
-      build:
-        context: ShopService
-        dockerfile: Dockerfile
-      depends_on:
-        - mysql
-      container_name: shop-service
-      networks:
-        - net
-      ports:
-        - "8080:8080"
-    networks:
-      net:
-        driver: bridge
+    external: true
