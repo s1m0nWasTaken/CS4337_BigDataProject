@@ -55,15 +55,66 @@ public class ShopService {
   }
 
   @GetMapping("/shopItem")
-  public ResponseEntity<Map<String, Object>> shopItem() {
-    List<Map<String, Object>> shopItems;
+  public ResponseEntity<Map<String, Object>> shopItem(
+          @RequestParam(required = false) String itemName,
+          @RequestParam(required = false) String description,
+          @RequestParam(required = false) Double minPrice,
+          @RequestParam(required = false) Double maxPrice,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "5") int pageSize) {
+
+//    // Set maxItemsShown to limit the max number of items shown
+//    int maxItemsShown = 5;
+//
+//    // Ensure pageSize does not exceed the maxItemsShown
+//    if (pageSize > maxItemsShown) {
+//      pageSize = maxItemsShown;
+//    }
+
+    List<Object> params = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("SELECT * FROM ShopItem WHERE 1=1");
+
+    // Add filters for item name, description, and price
+    if (itemName != null && !itemName.isEmpty()) {
+      sql.append(" AND itemName LIKE ?");
+      params.add("%" + itemName + "%");
+    }
+
+    if (description != null && !description.isEmpty()) {
+      sql.append(" AND description LIKE ?");
+      params.add("%" + description + "%");
+    }
+
+    if (minPrice != null && maxPrice == null) {
+      sql.append(" AND price >= ?");
+      params.add(minPrice);
+    } else if (minPrice == null && maxPrice != null) {
+      sql.append(" AND price <= ?");
+      params.add(maxPrice);
+    } else if (minPrice != null && maxPrice != null) {
+      sql.append(" AND price BETWEEN ? AND ?");
+      params.add(minPrice);
+      params.add(maxPrice);
+    }
+
+    // Add LIMIT clause to restrict results to maxItemsShown (5 items max)
+    sql.append(" LIMIT ?");
+    params.add(pageSize);
+
+    // Add OFFSET clause for pagination
+    sql.append(" OFFSET ?");
+    params.add(page * pageSize);
+
     try {
-      shopItems = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
+      // Execute the query
+      List<Map<String, Object>> shopItems = jdbcTemplate.queryForList(sql.toString(), params.toArray());
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
   }
+
+
 
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
