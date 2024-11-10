@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
@@ -30,12 +31,12 @@ public class UserService {
 
   @GetMapping("/users") // pass an ishidden feild in json body to choose
   public ResponseEntity<Map<String, Object>> users(
-      @RequestBody(required = false) Map<String, String> isHidden) {
+      @RequestParam(required = false) Boolean isHidden) {
     // TODO: later add a check with auth if admin and if so allow to show hidden
     // and normal else only normal
     try {
       if (isHidden != null) {
-        Boolean hidden = (isHidden.get("isHidden") == "true" ? true : false);
+        boolean hidden = isHidden;
         List<User> users =
             jdbcTemplate.query(
                 "SELECT * FROM User WHERE isHidden = ?", new UserRowMapper(), hidden);
