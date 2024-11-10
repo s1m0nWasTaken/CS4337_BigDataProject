@@ -28,9 +28,11 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 public class BanService {
   private String userContainer = System.getenv("USER_CONTAINER");
-  private String userServiceUrl = "http://" + this.userContainer + ":9090/user/ban/{id}";
+  private String userServiceUrl =
+      "http://" + this.userContainer + ":9090/user/ban/{id}";
   private String shopContainer = System.getenv("SHOP_CONTAINER");
-  private String shopServiceUrl = "http://" + this.shopContainer + ":8080/shopItem/ban/{id}";
+  private String shopServiceUrl =
+      "http://" + this.shopContainer + ":8080/shopItem/ban/{id}";
   private final RestTemplate restTemplate = new RestTemplate();
 
   @Autowired private JdbcTemplate jdbcTemplate;
@@ -39,15 +41,13 @@ public class BanService {
     SpringApplication.run(BanService.class, args);
   }
 
-  @PostMapping("/users/check")
+  @PostMapping("/user/check")
   public ResponseEntity<Map<String, ? extends Object>> checkUserBans() {
     Date now = new Date(System.currentTimeMillis());
     try {
-      List<UserBan> users =
-          jdbcTemplate.query(
-              "SELECT * FROM `UserBan` WHERE suspendedUntil <= ? AND isActive = TRUE",
-              new UserBanMapper(),
-              now);
+      List<UserBan> users = jdbcTemplate.query(
+          "SELECT * FROM `UserBan` WHERE suspendedUntil <= ? AND isActive = TRUE",
+          new UserBanMapper(), now);
       if (users.size() < 1) {
         return ResponseEntity.ok(Map.of("success", "no users to unban"));
       }
@@ -59,40 +59,38 @@ public class BanService {
       HttpHeaders headers = new HttpHeaders();
       headers.set("Content-Type", "application/json");
 
-      HttpEntity<Object> requestEntity = new HttpEntity<>(userUnbanJsonReq, headers);
+      HttpEntity<Object> requestEntity =
+          new HttpEntity<>(userUnbanJsonReq, headers);
       // loop through the list and try to unhide each user and store results to
       // inform poster
       for (UserBan u : users) {
-        ResponseEntity<Map<String, Object>> resJson =
-            restTemplate.exchange(
-                this.userServiceUrl,
-                HttpMethod.PUT,
-                requestEntity,
-                new ParameterizedTypeReference<Map<String, Object>>() {},
-                u.getUserId());
+        ResponseEntity<Map<String, Object>> resJson = restTemplate.exchange(
+            this.userServiceUrl, HttpMethod.PUT, requestEntity,
+            new ParameterizedTypeReference<Map<String, Object>>() {},
+            u.getUserId());
         if (resJson.getStatusCode() != HttpStatus.OK) {
           returnJson.get("failed to unban").add(u.getUserId());
         } else {
           returnJson.get("unbanned").add(u.getUserId());
-          jdbcTemplate.update("UPDATE `UserBan` SET isActive = FALSE WHERE id = ?", u.getId());
+          jdbcTemplate.update(
+              "UPDATE `UserBan` SET isActive = FALSE WHERE id = ?", u.getId());
         }
       }
 
       return ResponseEntity.ok(returnJson);
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @PostMapping("/shops/check")
+  @PostMapping("/shopItem/check")
   public ResponseEntity<Map<String, ? extends Object>> checkShopBans() {
     Date now = new Date(System.currentTimeMillis());
     try {
-      List<ShopBan> shopIs =
-          jdbcTemplate.query(
-              "SELECT * FROM `ShopItemBan` WHERE suspendedUntil <= ? AND isActive = TRUE",
-              new ShopBanMapper(),
-              now);
+      List<ShopBan> shopIs = jdbcTemplate.query(
+          "SELECT * FROM `ShopItemBan` WHERE suspendedUntil <= ? AND isActive = TRUE",
+          new ShopBanMapper(), now);
       if (shopIs.size() < 1) {
         return ResponseEntity.ok(Map.of("success", "no shop items to unban"));
       }
@@ -104,129 +102,162 @@ public class BanService {
       HttpHeaders headers = new HttpHeaders();
       headers.set("Content-Type", "application/json");
 
-      HttpEntity<Object> requestEntity = new HttpEntity<>(shopIUnbanJsonReq, headers);
+      HttpEntity<Object> requestEntity =
+          new HttpEntity<>(shopIUnbanJsonReq, headers);
       // loop through the list and try to unhide each user and store results to
       // inform poster
       for (ShopBan u : shopIs) {
-        ResponseEntity<Map<String, Object>> resJson =
-            restTemplate.exchange(
-                this.shopServiceUrl,
-                HttpMethod.PUT,
-                requestEntity,
-                new ParameterizedTypeReference<Map<String, Object>>() {},
-                u.getShopItemId());
+        ResponseEntity<Map<String, Object>> resJson = restTemplate.exchange(
+            this.shopServiceUrl, HttpMethod.PUT, requestEntity,
+            new ParameterizedTypeReference<Map<String, Object>>() {},
+            u.getShopItemId());
         if (resJson.getStatusCode() != HttpStatus.OK) {
           returnJson.get("failed to unban").add(u.getShopItemId());
         } else {
           returnJson.get("unbanned").add(u.getShopItemId());
-          jdbcTemplate.update("UPDATE `ShopItemBan` SET isActive = FALSE WHERE id = ?", u.getId());
+          jdbcTemplate.update(
+              "UPDATE `ShopItemBan` SET isActive = FALSE WHERE id = ?",
+              u.getId());
         }
       }
 
       return ResponseEntity.ok(returnJson);
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @GetMapping("/users")
+  @GetMapping("/user")
   public ResponseEntity<Map<String, Object>> getUsersBans() {
     try {
-      List<UserBan> users = jdbcTemplate.query("SELECT * FROM `UserBan`", new UserBanMapper());
-
-      return ResponseEntity.ok(Map.of("success", users));
-    } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-    }
-  }
-
-  @GetMapping("/users/{id}")
-  public ResponseEntity<Map<String, Object>> getUserBans(@PathVariable("id") int id) {
-    try {
       List<UserBan> users =
-          jdbcTemplate.query("SELECT * FROM `UserBan` WHERE userId = ?", new UserBanMapper(), id);
+          jdbcTemplate.query("SELECT * FROM `UserBan`", new UserBanMapper());
 
       return ResponseEntity.ok(Map.of("success", users));
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @PostMapping("/users")
-  public ResponseEntity<Map<String, Object>> banUser(@RequestBody ReqBan banInfo) {
+  @GetMapping("/user/{id}")
+  public ResponseEntity<Map<String, Object>>
+  getUserBans(@PathVariable("id") int id) {
+    try {
+      List<UserBan> users = jdbcTemplate.query(
+          "SELECT * FROM `UserBan` WHERE userId = ?", new UserBanMapper(), id);
+
+      return ResponseEntity.ok(Map.of("success", users));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
+    }
+  }
+
+  @PostMapping("/user")
+  public ResponseEntity<Map<String, Object>>
+  banUser(@RequestBody ReqBan banInfo) {
     if (banInfo.getBannedId() == 0) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", "0 is not a valid bannedId"));
     }
-    Map<String, String> userUnbanJsonReq = Map.of("isHidden", "true");
+    Map<String, String> userBanJsonReq = Map.of("isHidden", "true");
 
     HttpHeaders headers = new HttpHeaders();
     headers.set("Content-Type", "application/json");
 
-    HttpEntity<Object> requestEntity = new HttpEntity<>(userUnbanJsonReq, headers);
+    HttpEntity<Object> requestEntity =
+        new HttpEntity<>(userBanJsonReq, headers);
 
     try {
 
       assert banInfo.getSuspendedUntil() != null;
-      ResponseEntity<Map<String, Object>> resJson =
-          restTemplate.exchange(
-              this.userServiceUrl,
-              HttpMethod.PUT,
-              requestEntity,
-              new ParameterizedTypeReference<Map<String, Object>>() {},
-              banInfo.getBannedId());
+      ResponseEntity<Map<String, Object>> resJson = restTemplate.exchange(
+          this.userServiceUrl, HttpMethod.PUT, requestEntity,
+          new ParameterizedTypeReference<Map<String, Object>>() {},
+          banInfo.getBannedId());
 
       if (resJson.getStatusCode() != HttpStatus.OK) {
         return resJson;
       }
       String sqlInsert =
-          "INSERT INTO `UserBan` (userId,suspendedUntil,isActive) " + "VALUES (?, ?, TRUE)";
-      int success =
-          jdbcTemplate.update(sqlInsert, banInfo.getBannedId(), banInfo.getSuspendedUntil());
+          "INSERT INTO `UserBan` (userId,suspendedUntil,isActive) "
+          + "VALUES (?, ?, TRUE)";
+      int success = jdbcTemplate.update(sqlInsert, banInfo.getBannedId(),
+                                        banInfo.getSuspendedUntil());
       return ResponseEntity.ok(Map.of("success", success));
     } catch (DataAccessException | HttpClientErrorException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @GetMapping("/shops")
+  @GetMapping("/shopItem")
   public ResponseEntity<Map<String, Object>> getShops() {
     try {
-      List<ShopBan> shops = jdbcTemplate.query("SELECT * FROM `ShopItemBan`", new ShopBanMapper());
+      List<ShopBan> shops = jdbcTemplate.query("SELECT * FROM `ShopItemBan`",
+                                               new ShopBanMapper());
       return ResponseEntity.ok(Map.of("success", shops));
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @GetMapping("/shops/{id}")
-  public ResponseEntity<Map<String, Object>> getShopBans(@PathVariable("id") int id) {
+  @GetMapping("/shopItem/{id}")
+  public ResponseEntity<Map<String, Object>>
+  getShopBans(@PathVariable("id") int id) {
     try {
       List<ShopBan> shop =
-          jdbcTemplate.query(
-              "SELECT * FROM `ShopItemBan` WHERE shopItemId = ?", new ShopBanMapper(), id);
+          jdbcTemplate.query("SELECT * FROM `ShopItemBan` WHERE shopItemId = ?",
+                             new ShopBanMapper(), id);
 
       return ResponseEntity.ok(Map.of("success", shop));
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
-  @PostMapping("/shops")
-  public ResponseEntity<Map<String, Object>> banShop(@RequestBody ReqBan banInfo) {
+  @PostMapping("/shopItem")
+  public ResponseEntity<Map<String, Object>>
+  banShop(@RequestBody ReqBan banInfo) {
     if (banInfo.getBannedId() == 0) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(Map.of("error", "0 is not a valid bannedId"));
     }
+
+    Map<String, String> shopBanJsonReq = Map.of("isHidden", "true");
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Content-Type", "application/json");
+
+    HttpEntity<Object> requestEntity =
+        new HttpEntity<>(shopBanJsonReq, headers);
+
     try {
+
+      assert banInfo.getSuspendedUntil() != null;
+      ResponseEntity<Map<String, Object>> resJson = restTemplate.exchange(
+          this.shopServiceUrl, HttpMethod.PUT, requestEntity,
+          new ParameterizedTypeReference<Map<String, Object>>() {},
+          banInfo.getBannedId());
+
+      if (resJson.getStatusCode() != HttpStatus.OK) {
+        return resJson;
+      }
+
       String sqlInsert =
-          "INSERT INTO `ShopItemBan` (shopItemId,suspendedUntil,isActive) " + "VALUES (?, ?, TRUE)";
-      int success =
-          jdbcTemplate.update(sqlInsert, banInfo.getBannedId(), banInfo.getSuspendedUntil());
+          "INSERT INTO `ShopItemBan` (shopItemId,suspendedUntil,isActive) "
+          + "VALUES (?, ?, TRUE)";
+      int success = jdbcTemplate.update(sqlInsert, banInfo.getBannedId(),
+                                        banInfo.getSuspendedUntil());
 
       return ResponseEntity.ok(Map.of("success", success));
-    } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    } catch (DataAccessException | HttpClientErrorException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 }
