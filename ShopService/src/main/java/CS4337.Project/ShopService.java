@@ -28,8 +28,7 @@ public class ShopService {
     try {
       shops = jdbcTemplate.queryForList("SELECT * FROM Shop");
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
     return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shops));
   }
@@ -40,10 +39,15 @@ public class ShopService {
     try {
       String sqlInsert =
           "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
-          + "VALUES (?, ?, ?, ?, ?, ?)";
-      jdbcTemplate.update(sqlInsert, shop.getShopOwnerid(), shop.getShopName(),
-                          shop.getImageData(), shop.getDescription(),
-                          shop.getShopType().name(), shop.getShopEmail());
+              + "VALUES (?, ?, ?, ?, ?, ?)";
+      jdbcTemplate.update(
+          sqlInsert,
+          shop.getShopOwnerid(),
+          shop.getShopName(),
+          shop.getImageData(),
+          shop.getDescription(),
+          shop.getShopType().name(),
+          shop.getShopEmail());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
@@ -56,11 +60,9 @@ public class ShopService {
     try {
       shopItems = jdbcTemplate.queryForList("SELECT * FROM ShopItem");
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(Map.of("success", shopItems));
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
   }
 
   @PostMapping("/shopItem")
@@ -69,10 +71,15 @@ public class ShopService {
     try {
       String sqlInsert =
           "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
-          + "VALUES (?, ?, ?, ?, ?, ?)";
-      jdbcTemplate.update(sqlInsert, shopItem.getShopid(), shopItem.getPrice(),
-                          shopItem.getItemName(), shopItem.getStock(),
-                          shopItem.getPicture(), shopItem.getDescription());
+              + "VALUES (?, ?, ?, ?, ?, ?)";
+      jdbcTemplate.update(
+          sqlInsert,
+          shopItem.getShopid(),
+          shopItem.getPrice(),
+          shopItem.getItemName(),
+          shopItem.getStock(),
+          shopItem.getPicture(),
+          shopItem.getDescription());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
@@ -80,8 +87,7 @@ public class ShopService {
   }
 
   @PutMapping("/shopItem/{id}")
-  public Map<String, Object> updateShopItem(@PathVariable int id,
-                                            @RequestBody ShopItem shopItem) {
+  public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
     // need to add user access checking
 
     List<Object> params = new ArrayList<>();
@@ -120,8 +126,7 @@ public class ShopService {
       int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
 
       if (rowsAffected > 0) {
-        return Map.of("success", 1, "message",
-                      "Shop item updated successfully");
+        return Map.of("success", 1, "message", "Shop item updated successfully");
       } else {
         return Map.of("success", 0, "message", "Shop item not found");
       }
@@ -131,8 +136,7 @@ public class ShopService {
   }
 
   @PutMapping("/shop/{id}")
-  public Map<String, Object> updateShop(@PathVariable int id,
-                                        @RequestBody Shop shop) {
+  public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
     // add checking for only shopOwnerId allocated to shop allowed to update
     // shop
 
@@ -211,8 +215,7 @@ public class ShopService {
       int rowsAffected = jdbcTemplate.update(deleteQuery, id);
 
       if (rowsAffected > 0) {
-        return Map.of("success", 1, "message",
-                      "Shop item deleted successfully");
+        return Map.of("success", 1, "message", "Shop item deleted successfully");
       } else {
         return Map.of("success", 0, "message", "Shop item not found");
       }
@@ -222,9 +225,8 @@ public class ShopService {
   }
 
   @PutMapping("shopItem/ban/{id}")
-  public ResponseEntity<Map<String, Object>>
-  banShopItem(@PathVariable("id") int id,
-              @RequestBody Map<String, String> requestBody) {
+  public ResponseEntity<Map<String, Object>> banShopItem(
+      @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
     try {
       String hiddenStr = requestBody.get("isHidden");
       Boolean hidden = (hiddenStr.equals("true") ? true : false);
@@ -233,11 +235,9 @@ public class ShopService {
       if (sucess == 1) {
         return ResponseEntity.ok(Map.of("Shop item hidden", hidden));
       }
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(Map.of("error", "bad request"));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "bad request"));
     } catch (DataAccessException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(Map.of("error", e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
 }
