@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
@@ -136,7 +138,8 @@ public class ShopService {
 
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
-    // add checking for only shopOwnerId allocated to shop allowed to update shop
+    // add checking for only shopOwnerId allocated to shop allowed to update
+    // shop
     String updateQuery =
         "UPDATE Shop SET shopOwnerid = ?, shopName = ?, imageData = ?, description = ?, shopType = ?, shopEmail = ? WHERE id = ?";
 
@@ -193,6 +196,20 @@ public class ShopService {
       }
     } catch (DataAccessException e) {
       return Map.of("error", e.getMessage());
+    }
+  }
+
+  @PutMapping("shopItem/ban/{id}")
+  public ResponseEntity<Map<String, Object>> banShopItem(
+      @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
+    try {
+      String hiddenStr = requestBody.get("isHidden");
+      Boolean hidden = (hiddenStr == "true" ? true : false);
+      String banStatement = "UPDATE `ShopItem` SET isHidden = ? WHERE id = ?";
+      jdbcTemplate.update(banStatement, hidden, id);
+      return ResponseEntity.ok(Map.of("Shop item hidden", hidden));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
 }
