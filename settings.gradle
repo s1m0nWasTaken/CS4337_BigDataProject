@@ -5,3 +5,5 @@ include 'BanService'
 include 'ShopService'
 include 'ConfigService'
 include 'AuthService'
+include 'RatingService'
+
