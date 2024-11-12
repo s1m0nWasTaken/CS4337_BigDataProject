@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: bandb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_DATABASE: ban_service
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${BAN_MYSQL_SERVER_PORT}:${BAN_MYSQL_CONTAINER_PORT}"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+  ban-service:
+    image: banservice
+    depends_on :
+      - mysql
+    container_name: ${BAN_CONTAINER}
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${BAN_SERVER_PORT}:${BAN_CONTAINER_PORT}"
+    env_file:
+      - .env
+networks:
+  netw:
+    external: true
+    driver: bridge

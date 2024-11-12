@@ -3,9 +3,9 @@ package CS4337.Project;
 public class ShopItem {
   private int id;
   private int shopid;
-  private double price;
+  private double price = -1;
   private String itemName;
-  private int stock;
+  private int stock = -1;
   private String description;
   private String picture;
   private boolean isHidden;
