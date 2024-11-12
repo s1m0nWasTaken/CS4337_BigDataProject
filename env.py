@@ -4,10 +4,23 @@ import http.client
 import json
 import time
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
+conf_env = os.path.join(script_dir, "ConfigService/.env")
+with open(conf_env, "w") as env_file:
+    env_file.write("""\
+#shared-config
+export ENV=dev
+export USER_NAME=root
+export USER_PSWD=1234
+export NETWORK_NAME=netw
+
+#config service
+export CNFG_SERVER_PORT=8888
+export CNFG_CONTAINER_PORT=8888
+""")
+
 # add to as you add services
 target_dirs = ["UserService", "ShopService", "MessagingService", "AuthService", "BanService", "ConfigService"]
-
-script_dir = os.path.dirname(os.path.realpath(__file__))
 
 docker_auth = ""
 if os.name == "posix":
@@ -59,7 +72,7 @@ def generate_env_vars(data):
     for source in data['propertySources']:
         name = source["name"]
         service = name.split("/")[-1].split("-")[0]  # Extract service name
-
+        
         # Ensure the service exists in the services dictionary
         if service not in services:
             continue
@@ -114,9 +127,8 @@ for target_dir in target_dirs:
     # Ensure the directory exists
     dir_path = os.path.join(script_dir, target_dir)
     os.makedirs(dir_path, exist_ok=True)
-
+    
     env_path = os.path.join(dir_path, ".env")
-
     with open(env_path, "w") as env_file:
         env_file.write(env_vars)
 
