@@ -3,82 +3,94 @@ package CS4337.Project;
 import java.math.BigDecimal;
 
 public class Transaction {
-    private int id;
-    private int sourceUserid;
-    private BigDecimal amount;
-    private TransactionStatus transactionStatus;
-    private String timeStamp;
-    private boolean isRefunded;
+  private int id;
+  private int sourceUserid;
+  private BigDecimal amount;
+  private TransactionStatus transactionStatus;
+  private String timeStamp;
+  private boolean isRefunded;
 
-    public Transaction() {
-    }
+  public Transaction() {}
 
-    public Transaction(int id, int sourceUserid, BigDecimal amount, TransactionStatus transactionStatus, String timeStamp, boolean isRefunded) {
-        this.id = id;
-        this.sourceUserid = sourceUserid;
-        this.amount = amount;
-        this.transactionStatus = transactionStatus;
-        this.timeStamp = timeStamp;
-        this.isRefunded = isRefunded;
-    }
+  public Transaction(
+      int id,
+      int sourceUserid,
+      BigDecimal amount,
+      TransactionStatus transactionStatus,
+      String timeStamp,
+      boolean isRefunded) {
+    this.id = id;
+    this.sourceUserid = sourceUserid;
+    this.amount = amount;
+    this.transactionStatus = transactionStatus;
+    this.timeStamp = timeStamp;
+    this.isRefunded = isRefunded;
+  }
 
-    public int getId() {
-        return id;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public int getSourceUserid() {
-        return sourceUserid;
-    }
+  public int getSourceUserid() {
+    return sourceUserid;
+  }
 
-    public void setSourceUserid(int sourceUserid) {
-        this.sourceUserid = sourceUserid;
-    }
+  public void setSourceUserid(int sourceUserid) {
+    this.sourceUserid = sourceUserid;
+  }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+  public BigDecimal getAmount() {
+    return amount;
+  }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
 
-    public TransactionStatus getTransactionStatus() {
-        return transactionStatus;
-    }
+  public TransactionStatus getTransactionStatus() {
+    return transactionStatus;
+  }
 
-    public void setTransactionStatus(TransactionStatus transactionStatus) {
-        this.transactionStatus = transactionStatus;
-    }
+  public void setTransactionStatus(TransactionStatus transactionStatus) {
+    this.transactionStatus = transactionStatus;
+  }
 
-    public String getTimeStamp() {
-        return timeStamp;
-    }
+  public String getTimeStamp() {
+    return timeStamp;
+  }
 
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
+  public void setTimeStamp(String timeStamp) {
+    this.timeStamp = timeStamp;
+  }
 
-    public boolean isRefunded() {
-        return isRefunded;
-    }
+  public boolean isRefunded() {
+    return isRefunded;
+  }
 
-    public void setRefunded(boolean refunded) {
-        isRefunded = refunded;
-    }
+  public void setRefunded(boolean refunded) {
+    isRefunded = refunded;
+  }
 
-    @Override
-    public String toString() {
-        return "CS4337.Project.Transaction{" +
-                "id=" + id +
-                ", sourceUserid=" + sourceUserid +
-                ", amount=" + amount +
-                ", transactionStatus=" + transactionStatus +
-                ", timeStamp='" + timeStamp + '\'' +
-                ", isRefunded=" + isRefunded +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "CS4337.Project.Transaction{"
+        + "id="
+        + id
+        + ", sourceUserid="
+        + sourceUserid
+        + ", amount="
+        + amount
+        + ", transactionStatus="
+        + transactionStatus
+        + ", timeStamp='"
+        + timeStamp
+        + '\''
+        + ", isRefunded="
+        + isRefunded
+        + '}';
+  }
 }

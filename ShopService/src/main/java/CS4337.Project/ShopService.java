@@ -24,11 +24,11 @@ public class ShopService {
 
   @GetMapping("/shop")
   public ResponseEntity<Map<String, Object>> shop(
-          @RequestParam(required = false) String shopName,
-          @RequestParam(required = false) String description,
-          @RequestParam(required = false) Integer id,
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "50") int pageSize) {
+      @RequestParam(required = false) String shopName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) Integer id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int pageSize) {
 
     int maxItemsShown = 50;
 
@@ -49,7 +49,7 @@ public class ShopService {
       params.add("%" + description + "%");
     }
 
-    if (id!=null){
+    if (id != null) {
       sql.append(" AND id = ?");
       params.add(+id);
     }
@@ -91,12 +91,12 @@ public class ShopService {
 
   @GetMapping("/shopItem")
   public ResponseEntity<Map<String, Object>> shopItem(
-          @RequestParam(required = false) String itemName,
-          @RequestParam(required = false) String description,
-          @RequestParam(required = false) Double minPrice,
-          @RequestParam(required = false) Double maxPrice,
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "50") int pageSize) {
+      @RequestParam(required = false) String itemName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) Double minPrice,
+      @RequestParam(required = false) Double maxPrice,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int pageSize) {
 
     // Set maxItemsShown to limit the max number of items shown
     int maxItemsShown = 50;
@@ -142,14 +142,13 @@ public class ShopService {
 
     try {
       // Execute the query
-      List<Map<String, Object>> shopItems = jdbcTemplate.queryForList(sql.toString(), params.toArray());
+      List<Map<String, Object>> shopItems =
+          jdbcTemplate.queryForList(sql.toString(), params.toArray());
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
-
-
 
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
