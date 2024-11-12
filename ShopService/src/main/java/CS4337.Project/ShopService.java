@@ -223,7 +223,8 @@ public class ShopService {
 
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
-    // add checking for only shopOwnerId allocated to shop allowed to update shop
+    // add checking for only shopOwnerId allocated to shop allowed to update
+    // shop
 
     List<Object> params = new ArrayList<>();
     StringBuilder sql = new StringBuilder("UPDATE Shop SET ");
@@ -306,6 +307,23 @@ public class ShopService {
       }
     } catch (DataAccessException e) {
       return Map.of("error", e.getMessage());
+    }
+  }
+
+  @PutMapping("shopItem/ban/{id}")
+  public ResponseEntity<Map<String, Object>> banShopItem(
+      @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
+    try {
+      String hiddenStr = requestBody.get("isHidden");
+      Boolean hidden = (hiddenStr.equals("true") ? true : false);
+      String banStatement = "UPDATE `ShopItem` SET isHidden = ? WHERE id = ?";
+      int sucess = jdbcTemplate.update(banStatement, hidden, id);
+      if (sucess == 1) {
+        return ResponseEntity.ok(Map.of("Shop item hidden", hidden));
+      }
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "bad request"));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
 }

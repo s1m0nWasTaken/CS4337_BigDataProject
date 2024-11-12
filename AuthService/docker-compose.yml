@@ -1,0 +1,32 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: authdb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_DATABASE: auth
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${AUTH_MYSQL_SERVER_PORT}:${AUTH_MYSQL_CONTAINER_PORT}"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
+  auth-service:
+    build:
+      dockerfile: Dockerfile
+    image: authservice
+    container_name: ${AUTH_CONTAINER}
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+
+networks:
+  netw:
+    driver: bridge
+    external: true
