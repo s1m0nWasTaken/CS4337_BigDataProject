@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @RestController
@@ -19,6 +20,9 @@ public class TransactionService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     public static void main(String[] args) {
         SpringApplication.run(TransactionService.class, args);
@@ -74,10 +78,10 @@ public class TransactionService {
     public Map<String, Object> addTransaction(@RequestBody Transaction transaction) {
         // Step 1: Call the fake payment service
         try {
+            String fakePaymentServiceUrl = "http://localhost:8080/payment/process";
             ResponseEntity<String> paymentResponse = restTemplate.postForEntity(fakePaymentServiceUrl, null, String.class);
 
-            if (paymentResponse.getStatusCode() == HttpStatus.OK) {
-                // Step 2: Proceed with saving the transaction if payment is successful
+            if (paymentResponse.getStatusCode() == HttpStatus.OK) {                // Step 2: Proceed with saving the transaction if payment is successful
                 String sqlInsert =
                         "INSERT INTO Transaction (sourceUserid, amount, transactionStatus, timeStamp, isRefunded) "
                                 + "VALUES (?, ?, ?, ?, ?)";
