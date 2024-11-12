@@ -1,10 +1,11 @@
 rootProject.name = 'Project'
 include 'UserService'
 include 'MessagingService'
+include 'BanService'
 include 'ShopService'
 include 'ConfigService'
+include 'AuthService'
 include 'PaymentService'
 include 'FakePaymentService'
 include 'TransactionService'
 include 'OrderService'
-
