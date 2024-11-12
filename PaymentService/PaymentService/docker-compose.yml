@@ -1,0 +1,13 @@
+version: '3'
+services:
+  payment-service:
+    image: paymentsvc:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      - auth-service
+      - user-service
+      - shop-service
