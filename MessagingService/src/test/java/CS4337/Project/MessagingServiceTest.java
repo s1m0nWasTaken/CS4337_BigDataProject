@@ -1,14 +1,5 @@
 package CS4337.Project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +8,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
 public class MessagingServiceTest {
@@ -103,42 +103,42 @@ public class MessagingServiceTest {
 
   @Test
   public void testGetChatParticipantsUnexpectedException() {
-    // Arrange
+    
     when(chatParticipantRepository.getAllChatParticipant())
         .thenThrow(new DataAccessException("Unexpected error") {});
 
-    // Act
+    
     ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
 
-    // Assert
+    
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertEquals("Database error: Unexpected error", response.getBody().get("error"));
   }
 
   @Test
   public void testGetChatParticipantsWhenNoneExist() {
-    // Arrange
+    
     when(chatParticipantRepository.getAllChatParticipant()).thenReturn(Collections.emptyList());
 
-    // Act
+    
     ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
 
-    // Assert
+    
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(Collections.emptyList(), response.getBody().get("success"));
   }
 
   @Test
   public void testRemoveChatWhenNoParticipants() {
-    // Arrange
+    
     int chatId = 1;
     when(chatParticipantRepository.delChatParticipant(chatId))
-        .thenReturn(0); // No participants to remove
+        .thenReturn(0); 
 
-    // Act
+    
     ResponseEntity<Map<String, Object>> response = messagingService.removeChat(chatId);
 
-    // Assert
+    
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertEquals("Chat participant not found.", response.getBody().get("message"));
     assertFalse((Boolean) response.getBody().get("success"));
@@ -146,31 +146,31 @@ public class MessagingServiceTest {
 
   @Test
   public void testSendMessageInvalidChatId() {
-    // Arrange
+    
     Map<String, Object> messageDetails = new HashMap<>();
-    messageDetails.put("chatid", null); // Invalid chat ID
+    messageDetails.put("chatid", null); 
     messageDetails.put("senderid", 1);
     messageDetails.put("content", "Hello!");
 
-    // Act
+   
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);
 
-    // Assert
+    
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Chat ID and Sender ID cannot be null.", response.getBody().get("error"));
   }
 
   @Test
   public void testSendMessageMissingSenderId() {
-    // Arrange
+    
     Map<String, Object> messageDetails = new HashMap<>();
     messageDetails.put("chatid", 1);
     messageDetails.put("content", "Hello!");
 
-    // Act
+    
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);
 
-    // Assert
+    
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Chat ID and Sender ID cannot be null.", response.getBody().get("error"));
   }
