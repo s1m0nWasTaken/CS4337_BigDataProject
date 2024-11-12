@@ -84,6 +84,19 @@ public class UserService {
     }
   }
 
+  @GetMapping("/user/email/{email}")
+  public ResponseEntity<Map<String, Object>> getUserByEmail(@PathVariable("email") String email) {
+    try {
+      User user =
+          jdbcTemplate.queryForObject(
+              "SELECT * FROM User WHERE email = ?", new UserRowMapper(), email);
+
+      return ResponseEntity.ok(Map.of("success", user));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @DeleteMapping("/user/{id}")
   public ResponseEntity<Map<String, String>> deleteUser(@PathVariable("id") int id) {
     try {
