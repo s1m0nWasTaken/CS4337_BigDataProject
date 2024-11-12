@@ -1,0 +1,15 @@
+services:
+  payment-service:
+    image: paymentservice
+
+    container_name: ${PAYMENT_CONTAINER}
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+    env_file:
+      - .env
+networks:
+  netw:
+    driver: bridge
+    external: true

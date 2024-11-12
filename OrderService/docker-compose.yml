@@ -11,8 +11,8 @@ services:
       - "${TRANSACTION_MYSQL_SERVER_PORT}:${TRANSACTION_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
-  shop-service:
-    image: ORDERservice
+  order-service:
+    image: orderservice
     depends_on:
       - mysql
     container_name: ${ORDER_CONTAINER}
