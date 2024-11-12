@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.security:spring-security-config:6.3.3'
 }
 
 dependencyManagement {

@@ -3,4 +3,5 @@ include 'UserService'
 include 'MessagingService'
 include 'ShopService'
 include 'ConfigService'
+include 'PaymentService'
 
