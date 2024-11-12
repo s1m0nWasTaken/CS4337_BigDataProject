@@ -1,5 +1,7 @@
 package CS4337.Project;
 
+import java.math.BigDecimal;
+
 public class Transaction {
     private int id;
     private int sourceUserid;
@@ -36,7 +38,7 @@ public class Transaction {
         this.sourceUserid = sourceUserid;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 

@@ -6,3 +6,5 @@ include 'ConfigService'
 include 'PaymentService'
 include 'FakePaymentService'
 include 'TransactionService'
+include 'OrderService'
+

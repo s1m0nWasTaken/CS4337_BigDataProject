@@ -1,8 +1,12 @@
 package CS4337.Project;
 
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +15,8 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -76,31 +82,36 @@ public class TransactionService {
 
     @PostMapping("/transaction")
     public Map<String, Object> addTransaction(@RequestBody Transaction transaction) {
-        // Step 1: Call the fake payment service
         try {
             String fakePaymentServiceUrl = "http://localhost:8080/payment/process";
             ResponseEntity<String> paymentResponse = restTemplate.postForEntity(fakePaymentServiceUrl, null, String.class);
 
-            if (paymentResponse.getStatusCode() == HttpStatus.OK) {                // Step 2: Proceed with saving the transaction if payment is successful
-                String sqlInsert =
-                        "INSERT INTO Transaction (sourceUserid, amount, transactionStatus, timeStamp, isRefunded) "
-                                + "VALUES (?, ?, ?, ?, ?)";
-                jdbcTemplate.update(
-                        sqlInsert,
-                        transaction.getSourceUserid(),
-                        transaction.getAmount(),
-                        transaction.getTransactionStatus().name(),
-                        transaction.getTimeStamp(),
-                        transaction.isRefunded());
-                return Map.of("success", 1, "message", "Transaction processed and saved successfully");
+            if (paymentResponse.getStatusCode() == HttpStatus.OK) {
+                String sqlInsert = "INSERT INTO Transaction (sourceUserid, amount, transactionStatus, timeStamp, isRefunded) "
+                        + "VALUES (?, ?, ?, ?, ?)";
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement(sqlInsert, new String[]{"transactionId"});
+                    ps.setLong(1, transaction.getSourceUserid());
+                    ps.setBigDecimal(2, transaction.getAmount());
+                    ps.setString(3, transaction.getTransactionStatus().name());
+                    ps.setTimestamp(4, Timestamp.valueOf(transaction.getTimeStamp()));
+                    ps.setBoolean(5, transaction.isRefunded());
+                    return ps;
+                }, keyHolder);
+
+                // Retrieve the generated transactionId
+                Long transactionId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+                return Map.of("success", 1, "message", "Transaction processed and saved successfully", "transactionId", transactionId);
             } else {
-                // Handle payment failure
                 return Map.of("error", "Payment failed, transaction not processed");
             }
         } catch (Exception e) {
             return Map.of("error", "Failed to connect to payment service: " + e.getMessage());
         }
     }
+
 
     @PutMapping("/transaction/status/{id}")
     public Map<String, Object> updateTransactionStatus(@PathVariable int id, @RequestBody Transaction transaction) {
