@@ -1,3 +1,5 @@
+package CS4337.Project;
+
 public class Transaction {
     private int id;
     private int sourceUserid;
@@ -68,7 +70,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "Transaction{" +
+        return "CS4337.Project.Transaction{" +
                 "id=" + id +
                 ", sourceUserid=" + sourceUserid +
                 ", amount=" + amount +
