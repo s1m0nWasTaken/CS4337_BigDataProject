@@ -102,32 +102,38 @@ public class TransactionService {
         }
     }
 
-    @PutMapping("/transaction/{id}")
-    public Map<String, Object> updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
+    @PutMapping("/transaction/status/{id}")
+    public Map<String, Object> updateTransactionStatus(@PathVariable int id, @RequestBody Transaction transaction) {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("UPDATE Transaction SET ");
-
-        if (transaction.getSourceUserid() != 0) {
-            sql.append("sourceUserid = ?, ");
-            params.add(transaction.getSourceUserid());
-        }
-
-        if (transaction.getAmount() != 0) {
-            sql.append("amount = ?, ");
-            params.add(transaction.getAmount());
-        }
 
         if (transaction.getTransactionStatus() != null) {
             sql.append("transactionStatus = ?, ");
             params.add(transaction.getTransactionStatus().name());
         }
 
-        if (transaction.getTimeStamp() != null) {
-            sql.append("timeStamp = ?, ");
-            params.add(transaction.getTimeStamp());
-        }
+        sql.append(" WHERE id = ?");
+        params.add(id);
 
-        sql.append("isRefunded = ?");
+        try {
+            int rowsAffected = jdbcTemplate.update(sql.toString(), params.toArray());
+            if (rowsAffected > 0) {
+                return Map.of("success", 1, "message", "Transaction updated successfully");
+            } else {
+                return Map.of("success", 0, "message", "Transaction not found");
+            }
+        } catch (DataAccessException e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
+    @PutMapping("/transaction/refund/{id}")
+    public Map<String, Object> updateTransactionRefundState(@PathVariable int id, @RequestBody Transaction transaction) {
+        // add validation so only site admin can use this endpoint
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("UPDATE Transaction SET ");
+
+        sql.append(" SET isRefunded = ?");
         params.add(transaction.isRefunded());
 
         sql.append(" WHERE id = ?");
