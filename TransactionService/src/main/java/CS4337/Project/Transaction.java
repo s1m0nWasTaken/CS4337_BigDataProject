@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class Transaction {
     private int id;
     private int sourceUserid;
-    private double amount;
+    private BigDecimal amount;
     private TransactionStatus transactionStatus;
     private String timeStamp;
     private boolean isRefunded;
@@ -13,7 +13,7 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(int id, int sourceUserid, double amount, TransactionStatus transactionStatus, String timeStamp, boolean isRefunded) {
+    public Transaction(int id, int sourceUserid, BigDecimal amount, TransactionStatus transactionStatus, String timeStamp, boolean isRefunded) {
         this.id = id;
         this.sourceUserid = sourceUserid;
         this.amount = amount;
@@ -42,7 +42,7 @@ public class Transaction {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

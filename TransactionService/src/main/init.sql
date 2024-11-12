@@ -9,3 +9,8 @@ CREATE TABLE IF NOT EXISTS `Transaction` (
     isRefunded BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (sourceUserid) REFERENCES user_service.User(id)
 );
+
+#CREATE INDEX IF NOT EXISTS idx_transaction_sourceUserid ON Transaction (sourceUserid);
+CREATE INDEX IF NOT EXISTS idx_transaction_amount ON Transaction (amount);
+CREATE INDEX IF NOT EXISTS idx_transaction_transactionStatus ON Transaction (transactionStatus);
+CREATE INDEX IF NOT EXISTS idx_transaction_timeStamp ON Transaction (timeStamp);

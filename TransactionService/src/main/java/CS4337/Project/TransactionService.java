@@ -144,7 +144,7 @@ public class TransactionService {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("UPDATE Transaction SET ");
 
-        sql.append(" SET isRefunded = ?");
+        sql.append(" isRefunded = ?");
         params.add(transaction.isRefunded());
 
         sql.append(" WHERE id = ?");
