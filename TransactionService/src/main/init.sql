@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS `Transaction` (
 );
 
 #CREATE INDEX IF NOT EXISTS idx_transaction_sourceUserid ON Transaction (sourceUserid);
-CREATE INDEX IF NOT EXISTS idx_transaction_amount ON Transaction (amount);
+CREATE INDEX idx_transaction_amount ON Transaction (amount);
 CREATE INDEX IF NOT EXISTS idx_transaction_transactionStatus ON Transaction (transactionStatus);
 CREATE INDEX IF NOT EXISTS idx_transaction_timeStamp ON Transaction (timeStamp);
