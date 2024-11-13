@@ -1,3 +1,4 @@
+USE rating_service;
 CREATE TABLE IF NOT EXISTS ShopRating (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shopid INT NOT NULL,
