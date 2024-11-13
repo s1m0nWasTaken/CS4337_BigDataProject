@@ -20,7 +20,7 @@ export CNFG_CONTAINER_PORT=8888
 """)
 
 # add to as you add services
-target_dirs = ["UserService", "ShopService", "MessagingService", "AuthService", "BanService", "ConfigService"]
+target_dirs = ["UserService", "ShopService", "MessagingService", "AuthService", "BanService", "ConfigService","APIGateway"]
 
 docker_auth = ""
 if os.name == "posix":
@@ -118,6 +118,10 @@ export MSG_CONTAINER=messaging-service
 export SHOP_CONTAINER=shop-service
 export USER_CONTAINER=user-service
 export AUTH_CONTAINER=auth
+export API_GATEWAY_CONTAINER=api-gateway
+#api gateway
+export GATEWAY_SERVER_PORT=9092 #doing it here as config service will be replaced with eurika
+export GATEWAY_CONTAINER_PORT=9092
 """
 
 env_vars = non_dynamic_vars + generate_env_vars(data)

@@ -1,0 +1,14 @@
+services:
+  api-gateway:
+    image: apigateway
+    container_name: ${API_GATEWAY_CONTAINER}
+    networks:
+      - ${NETWORK_NAME}
+    ports:
+      - "${GATEWAY_SERVER_PORT}:${GATEWAY_CONTAINER_PORT}"
+    env_file:
+      - .env
+networks:
+  netw:
+    driver: bridge
+    external: true
