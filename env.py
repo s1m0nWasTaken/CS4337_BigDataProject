@@ -5,11 +5,11 @@ def copy_env_file_to_services(src_file, root_dir):
     if not os.path.isfile(src_file):
         print(f"Source file {src_file} does not exist.")
         return
-    
+
     for subdir, dirs, files in os.walk(root_dir):
         if subdir.endswith('Service'):
             dest_file = os.path.join(subdir, '.env')
-            
+
             try:
                 shutil.copy(src_file, dest_file)
                 print(f"Copied .env to: {subdir}")
