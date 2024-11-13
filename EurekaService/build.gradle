@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.4'
+    id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.diffplug.spotless' version '7.0.0.BETA2'
 }
@@ -18,19 +18,13 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    sourceCompatibility = '21'
-    targetCompatibility = '21'
-}
-
 ext {
     set('springCloudVersion', "2023.0.3")
 }
 
 dependencies {
-    implementation 'org.apache.groovy:groovy'
-    implementation 'org.springframework.cloud:spring-cloud-config-server'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

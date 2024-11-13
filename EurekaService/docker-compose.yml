@@ -1,0 +1,11 @@
+services:
+  eureka-service:
+    image: eurekaservice
+    container_name: eureka-service
+    networks:
+      - netw
+    ports:
+      - "8761:8761"
+networks:
+  netw:
+    driver: bridge

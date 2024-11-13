@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: shop_service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${SHOP_MYSQL_SERVER_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
     volumes:
@@ -15,9 +15,9 @@ services:
     image: shopservice
     depends_on:
       - mysql
-    container_name: ${SHOP_CONTAINER}
+    container_name: shop-service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
     env_file:
@@ -25,4 +25,3 @@ services:
 networks:
   netw:
     driver: bridge
-    external: true

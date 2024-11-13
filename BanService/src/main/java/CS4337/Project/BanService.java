@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpEntity;
@@ -24,13 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+@EnableDiscoveryClient
 @SpringBootApplication
 @RestController
 public class BanService {
-  private String userContainer = System.getenv("USER_CONTAINER");
-  private String userServiceUrl = "http://" + this.userContainer + ":9090/user/ban/{id}";
-  private String shopContainer = System.getenv("SHOP_CONTAINER");
-  private String shopServiceUrl = "http://" + this.shopContainer + ":8080/shopItem/ban/{id}";
+  private String userServiceUrl = "http://USERSERVICE/user/ban/{id}";
+  private String shopServiceUrl = "http://SHOPSERVICE/shopItem/ban/{id}";
   private final RestTemplate restTemplate = new RestTemplate();
 
   @Autowired private JdbcTemplate jdbcTemplate;
