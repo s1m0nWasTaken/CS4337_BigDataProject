@@ -3,10 +3,10 @@ services:
     image: mysql:latest
     container_name: authdb
     environment:
-      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: auth
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${AUTH_MYSQL_SERVER_PORT}:${AUTH_MYSQL_CONTAINER_PORT}"
     volumes:
@@ -16,9 +16,9 @@ services:
     build:
       dockerfile: Dockerfile
     image: authservice
-    container_name: ${AUTH_CONTAINER}
+    container_name: auth-service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
     env_file:
@@ -29,4 +29,3 @@ services:
 networks:
   netw:
     driver: bridge
-    external: true

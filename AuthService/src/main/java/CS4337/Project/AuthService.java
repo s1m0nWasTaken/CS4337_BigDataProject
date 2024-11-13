@@ -28,8 +28,7 @@ public class AuthService {
   @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
   private String redirectUri;
 
-  @Value("${user-service-url}")
-  private String userServiceUrl;
+  private String userServiceUrl = "http://USERSERVICE";
 
   @Value("${secret-key}")
   private String secretKey;
