@@ -1,4 +1,4 @@
-package CS4337.Project.RatingService;
+package CS4337.Project;
 
 import java.util.List;
 import java.util.Map;

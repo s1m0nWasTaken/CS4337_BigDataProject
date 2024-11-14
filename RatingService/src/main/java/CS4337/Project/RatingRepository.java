@@ -1,4 +1,4 @@
-package CS4337.Project.RatingService;
+package CS4337.Project;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

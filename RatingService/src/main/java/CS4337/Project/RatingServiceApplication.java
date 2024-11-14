@@ -1,4 +1,4 @@
-package CS4337.Project.RatingService;
+package CS4337.Project;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
