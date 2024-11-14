@@ -3,15 +3,14 @@ services:
     build:
       dockerfile: Dockerfile
     image: apigateway
-    container_name: api-gateway # ${API_GATEWAY_CONTAINER}
+    container_name: api-gateway
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
-      - "8083:8083" # "${API_GATEWAY_SERVER_PORT}:${API_GATEWAY_SERVER_PORT}
+      - "${API_GATEWAY_SERVER_PORT}:${API_GATEWAY_CONTAINER_PORT}"
     env_file:
       - .env
 
 networks:
   netw:
     driver: bridge
-    external: true

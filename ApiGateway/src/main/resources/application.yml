@@ -1,0 +1,65 @@
+spring:
+  server:
+    port: ${GATEWAY_SERVER_PORT}
+  application:
+    name: APIGateway
+  profiles:
+    active: ${ENV}
+  cloud:
+    config:
+      name: gateway
+    gateway:
+      routes:
+        # User Service Route
+        - id: ${USER_CONTAINER}
+          uri: lb://${USER_CONTAINER}:${USER_SERVER_PORT}
+          predicates:
+            - Path=/users/** #any req to gateway at /users/** path it will go to user service
+
+        # Shop Service Route
+        - id: ${SHOP_CONTAINER}
+          uri: lb://${SHOP_CONTAINER}:${SHOP_SERVER_PORT}
+          predicates:
+            - Path=/shop/**
+
+        # Messaging Service Route
+        - id: ${MSG_CONTAINER}
+          uri: lb://${MSG_CONTAINER}:${MSG_SERVER_PORT}
+          predicates:
+            - Path=/messages/**
+
+        # Ban Service Route
+        - id: ${BAN_CONTAINER}
+          uri: lb://${BAN_CONTAINER}:${BAN_SERVER_PORT}
+          predicates:
+            - Path=/ban/**
+
+        # Auth Service Route
+        - id: ${AUTH_CONTAINER}
+          uri: lb://${AUTH_CONTAINER}:${AUTH_SERVER_PORT}
+          predicates:
+            - Path=/auth/**
+
+        # Order Service Route
+#        - id: ${ORDER_CONTAINER}
+#          uri: lb://${ORDER_CONTAINER}:${ORDER_SERVER_PORT}
+#          predicates:
+#            - Path=/order/**
+
+        # Transaction Service Route
+#        - id: ${TRANSACTION_CONTAINER}
+#          uri: lb://${TRANSACTION_CONTAINER}:${TRANSACTION_SERVER_PORT}
+#          predicates:
+#            - Path=/auth/**
+
+        # Payment Service Route
+#        - id: ${PAYMENT_CONTAINER}
+#          uri: lb://${PAYMENT_CONTAINER}:${PAYMENT_SERVER_PORT}
+#          predicates:
+#            - Path=/payment/**
+
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://${EUREKA_CONTAINER}:${EUREKA_SERVER_PORT}/eureka/
