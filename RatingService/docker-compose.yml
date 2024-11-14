@@ -15,6 +15,9 @@ services:
   rating-service:
     image: ratingsvc
     container_name: rating-service
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - mysql
     networks:
