@@ -26,3 +26,15 @@ jobs:
 
     - name: Build the User Service Docker image
       run: docker build -f ./UserService/Dockerfile ./UserService/
+
+    - name: Build the Auth Service Docker image
+      run: docker build -f ./AuthService/Dockerfile ./AuthService/
+
+    - name: Build the Ban Service Docker image
+      run: docker build -f ./BanService/Dockerfile ./BanService/
+
+    - name: Build the Shop Service Docker image
+      run: docker build -f ./ShopService/Dockerfile ./ShopService/
+
+    - name: Build the Eureka Service Docker image
+      run: docker build -f ./EurekaService/Dockerfile ./EurekaService/

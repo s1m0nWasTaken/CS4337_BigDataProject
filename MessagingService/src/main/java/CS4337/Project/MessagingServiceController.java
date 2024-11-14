@@ -3,32 +3,25 @@ package CS4337.Project;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-@SpringBootApplication
 @RestController
-public class MessagingService {
+public class MessagingServiceController {
 
   private final ChatParticipantRepository chatParticipantRepository;
   private final MessageRepository messageRepository;
 
   @Autowired
-  public MessagingService(
+  public MessagingServiceController(
       ChatParticipantRepository chatParticipantRepository,
       MessageRepository messageRepository,
       JdbcTemplate jdbcTemplate) {
     this.chatParticipantRepository = chatParticipantRepository;
     this.messageRepository = messageRepository;
-  }
-
-  public static void main(String[] args) {
-    SpringApplication.run(MessagingService.class, args);
   }
 
   @GetMapping("/ChatParticipants")

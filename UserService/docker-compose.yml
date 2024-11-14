@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${USER_PSWD}
       MYSQL_DATABASE: user_service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${USER_MYSQL_SERVER_PORT}:${USER_MYSQL_CONTAINER_PORT}"
     volumes:
@@ -15,9 +15,9 @@ services:
     image: userservice
     depends_on :
       - mysql
-    container_name: ${USER_CONTAINER}
+    container_name: user-service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${USER_SERVER_PORT}:${USER_CONTAINER_PORT}"
     env_file:
@@ -25,4 +25,3 @@ services:
 networks:
   netw:
     driver: bridge
-    external: true
