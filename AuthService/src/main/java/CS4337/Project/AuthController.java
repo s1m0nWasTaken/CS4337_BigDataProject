@@ -48,6 +48,8 @@ public class AuthController {
     }
 
     User user = authService.getUserById(userId);
-    return authService.generateTokens(user);
+    String newJwt = authService.generateJWT(user);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(newJwt);
   }
 }

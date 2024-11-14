@@ -151,7 +151,7 @@ public class AuthService {
     }
   }
 
-  private String generateJWT(User user) {
+  public String generateJWT(User user) {
     return Jwts.builder()
         .setSubject(user.getUsername())
         .claim("role", user.getUserType().name())
