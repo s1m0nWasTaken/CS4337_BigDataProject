@@ -21,9 +21,24 @@ public class RatingRepository {
     return jdbcTemplate.update(sql, shopid, userid, message, rating);
   }
 
+  public List<Rating> checkRating(int shopid, int userid) {
+    String sql = "SELECT * FROM ShopRating WHERE shopid=? AND userid=?";
+    return jdbcTemplate.query(sql, new Object[] {shopid, userid}, this::mapRowToRating);
+  }
+
   public List<Rating> getRatingByShopId(int shopid) {
     String sql = "SELECT * FROM ShopRating WHERE shopid = ?";
     return jdbcTemplate.query(sql, new Object[] {shopid}, this::mapRowToRating);
+  }
+
+  public int updateRating(int id, String message, int rating) {
+    String sql = "UPDATE ShopRating SET message = ?, rating = ? WHERE id = ?";
+    return jdbcTemplate.update(sql, message, rating, id);
+  }
+
+  public int deleteRating(int id) {
+    String sql = "DELETE FROM ShopRating WHERE id = ?";
+    return jdbcTemplate.update(sql, id);
   }
 
   private Rating mapRowToRating(ResultSet rs, int rowNum) throws SQLException {
