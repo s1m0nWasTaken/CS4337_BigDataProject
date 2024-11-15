@@ -1,128 +1,92 @@
 package CS4337.Project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(RatingController.class)
 public class RatingControllerTest {
 
-  @Mock private RatingRepository ratingRepository;
+  @Autowired private MockMvc mockMvc;
 
-  @InjectMocks private RatingController ratingController;
+  @MockBean private RatingRepository ratingRepository;
 
-  @BeforeEach
-  public void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
-  public void testAddRating_Success() {
+  public void testAddRating() throws Exception {
     Map<String, Object> payload =
         Map.of(
             "shopid", 1,
             "userid", 1,
-            "message", "Great shop!",
+            "message", "Great service!",
             "rating", 5);
 
-    when(ratingRepository.checkRating(anyInt(), anyInt())).thenReturn(List.of());
-    when(ratingRepository.addRating(anyInt(), anyInt(), anyString(), anyInt())).thenReturn(1);
+    when(ratingRepository.addRating(1, 1, "Great service!", 5)).thenReturn(1);
+    when(ratingRepository.checkRating(1, 1)).thenReturn(List.of());
 
-    ResponseEntity<Map<String, String>> response = ratingController.addRating(payload);
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals("Rating added successfully", response.getBody().get("result"));
+    mockMvc
+        .perform(
+            post("/ratings/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("Rating added successfully"));
   }
 
   @Test
-  public void testAddRating_RatingAlreadyExists() {
-    Map<String, Object> payload =
-        Map.of(
-            "shopid", 1,
-            "userid", 1,
-            "message", "Great shop!",
-            "rating", 5);
+  public void testUpdateRating() throws Exception {
+    Map<String, Object> payload = Map.of("message", "Updated review", "rating", 4);
 
-    when(ratingRepository.checkRating(anyInt(), anyInt())).thenReturn(List.of(new Rating()));
+    when(ratingRepository.updateRating(1, "Updated review", 4)).thenReturn(1);
 
-    ResponseEntity<Map<String, String>> response = ratingController.addRating(payload);
-
-    assertEquals(400, response.getStatusCodeValue());
-    assertEquals("Rating already exists", response.getBody().get("error"));
+    mockMvc
+        .perform(
+            put("/ratings/update/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("Rating updated successfully"));
   }
 
   @Test
-  public void testAddRating_MissingParameter() {
-    Map<String, Object> payload =
-        Map.of(
-            "shopid", 1,
-            "userid", 1,
-            "message", "Great shop!");
+  public void testDeleteRating() throws Exception {
+    when(ratingRepository.deleteRating(1)).thenReturn(1);
 
-    ResponseEntity<Map<String, String>> response = ratingController.addRating(payload);
-
-    assertEquals(400, response.getStatusCodeValue());
-    assertEquals("All parameters are required", response.getBody().get("error"));
+    mockMvc
+        .perform(delete("/ratings/delete/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.result").value("Rating deleted successfully"));
   }
 
   @Test
-  public void testUpdateRating_Success() {
-    Map<String, Object> payload = Map.of("message", "Updated message", "rating", 4);
-
-    when(ratingRepository.updateRating(anyInt(), anyString(), anyInt())).thenReturn(1);
-
-    ResponseEntity<Map<String, String>> response = ratingController.updateRating(1, payload);
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals("Rating updated successfully", response.getBody().get("result"));
-  }
-
-  @Test
-  public void testUpdateRating_MissingParameter() {
-    Map<String, Object> payload = Map.of("message", "Updated message");
-
-    ResponseEntity<Map<String, String>> response = ratingController.updateRating(1, payload);
-
-    assertEquals(400, response.getStatusCodeValue());
-    assertEquals("All parameters are required", response.getBody().get("error"));
-  }
-
-  @Test
-  public void testDeleteRating_Success() {
-    when(ratingRepository.deleteRating(anyInt())).thenReturn(1);
-
-    ResponseEntity<Map<String, String>> response = ratingController.deleteRating(1);
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals("Rating deleted successfully", response.getBody().get("result"));
-  }
-
-  @Test
-  public void testGetRatingsByShopId_Success() {
+  public void testGetRatingsByShopId() throws Exception {
     Rating rating = new Rating();
     rating.setId(1);
     rating.setShopid(1);
     rating.setUserid(1);
-    rating.setMessage("Good shop");
+    rating.setMessage("Great service!");
     rating.setRating(5);
 
-    when(ratingRepository.getRatingByShopId(anyInt())).thenReturn(List.of(rating));
+    when(ratingRepository.getRatingByShopId(1)).thenReturn(List.of(rating));
 
-    ResponseEntity<List<Rating>> response = ratingController.getRatingsByShopId(1);
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(1, response.getBody().size());
-    assertEquals("Good shop", response.getBody().get(0).getMessage());
+    mockMvc
+        .perform(get("/ratings/shop/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value(1))
+        .andExpect(jsonPath("$[0].shopid").value(1))
+        .andExpect(jsonPath("$[0].userid").value(1))
+        .andExpect(jsonPath("$[0].message").value("Great service!"))
+        .andExpect(jsonPath("$[0].rating").value(5));
   }
 }
