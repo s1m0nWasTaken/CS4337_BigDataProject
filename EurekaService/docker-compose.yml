@@ -8,4 +8,5 @@ services:
       - "8761:8761"
 networks:
   netw:
+    external: true
     driver: bridge

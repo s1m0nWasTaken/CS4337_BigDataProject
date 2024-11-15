@@ -29,4 +29,5 @@ services:
 
 networks:
   netw:
+    external: true
     driver: bridge
