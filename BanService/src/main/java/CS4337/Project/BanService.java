@@ -31,7 +31,7 @@ import org.springframework.web.client.RestTemplate;
 public class BanService {
   private String userServiceUrl = "http://USERSERVICE/user/ban/{id}";
   private String shopServiceUrl = "http://SHOPSERVICE/shopItem/ban/{id}";
-  private final RestTemplate restTemplate = new RestTemplate();
+  @Autowired private final RestTemplate restTemplate = new RestTemplate();
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
