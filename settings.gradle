@@ -6,5 +6,5 @@ include 'ShopService'
 include 'ConfigService'
 include 'AuthService'
 include 'EurekaService'
-include 'ApiGateway'
+include 'ApiGatewayService'
 

@@ -1,9 +1,9 @@
 services:
-  api-gateway:
+  api-gateway-service:
     build:
       dockerfile: Dockerfile
-    image: apigateway
-    container_name: api-gateway
+    image: apigatewayservice
+    container_name: api-gateway-service
     networks:
       - netw
     ports:
