@@ -13,16 +13,10 @@ public class PaymentService {
 
   @Autowired private TransactionRepository transactionRepository;
 
-  private final String AUTH_SERVICE_URL = "http://localhost:8082";
-  private final String SHOP_SERVICE_URL = "http://localhost:8083";
-  private final String USER_SERVICE_URL = "http://localhost:8084";
+  private final String SHOP_SERVICE_URL = "http://SHOPSERVICE/";
+  private final String USER_SERVICE_URL = "http://USERSERVICE/";
 
-  public ResponseEntity<?> createTransaction(String token, TransactionRequest request) {
-    ResponseEntity<String> authResponse = verifyToken(token);
-    if (authResponse.getStatusCode() != HttpStatus.OK) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-    }
-
+  public ResponseEntity<?> createTransaction(TransactionRequest request) {
     ResponseEntity<User> userResponse = getUserById(request.getUserId());
     if (userResponse.getStatusCode() != HttpStatus.OK) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user");
@@ -57,30 +51,13 @@ public class PaymentService {
     return ResponseEntity.ok(transaction);
   }
 
-  public ResponseEntity<?> getTransactionStatus(String token, int transactionId) {
-    ResponseEntity<String> authResponse = verifyToken(token);
-    if (authResponse.getStatusCode() != HttpStatus.OK) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-    }
-
+  public ResponseEntity<?> getTransactionStatus(int transactionId) {
     Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
     if (transaction == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
     }
 
     return ResponseEntity.ok(transaction);
-  }
-
-  private ResponseEntity<String> verifyToken(String token) {
-    try {
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", token);
-      HttpEntity<String> entity = new HttpEntity<>(headers);
-      return restTemplate.exchange(
-          AUTH_SERVICE_URL + "/verify", HttpMethod.GET, entity, String.class);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-    }
   }
 
   private ResponseEntity<User> getUserById(int userId) {

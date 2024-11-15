@@ -12,23 +12,21 @@ public class PaymentController {
   @Autowired private PaymentService paymentService;
 
   @PostMapping("/create")
-  public ResponseEntity<?> createTransaction(
-      @RequestHeader("Authorization") String token, @RequestBody TransactionRequest request) {
+  public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest request) {
     if (paymentService == null) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("PaymentService not available");
     }
-    return paymentService.createTransaction(token, request);
+    return paymentService.createTransaction(request);
   }
 
   @GetMapping("/status/{transactionId}")
-  public ResponseEntity<?> getTransactionStatus(
-      @RequestHeader("Authorization") String token, @PathVariable int transactionId) {
+  public ResponseEntity<?> getTransactionStatus(@PathVariable int transactionId) {
     if (paymentService == null) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("PaymentService not available");
     }
-    return paymentService.getTransactionStatus(token, transactionId);
+    return paymentService.getTransactionStatus(transactionId);
   }
 }
 
