@@ -3,12 +3,14 @@ package CS4337.Project;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtils {
 
-  String secretKey = "shitted pants";
+//  @Value("${secret-key}")
+  private String secretKey = "Rlzt4oNqcVIT1m5lpEDdxYAikUaCxrphvaQAaxVwv8M=";
 
   public boolean validateToken(String token, String email) {
     final String extractedUserEmail = extractUserEmail(token);

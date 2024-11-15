@@ -14,7 +14,7 @@ spring:
         - id: user-service
           uri: lb://user-service:${USER_SERVER_PORT}
           predicates:
-            - Path=/users/** #any req to gateway at /users/** path it will go to user service
+            - Path=/user/** #any req to gateway at /users/** path it will go to user service
 
         # Shop Service Route
         - id: shop-service

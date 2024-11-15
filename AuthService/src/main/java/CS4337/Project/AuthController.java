@@ -18,7 +18,7 @@ public class AuthController {
   }
 
   // Use the below link to login via Google OAuth
-  // https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8082/grantcode&response_type=code&client_id=529138320852-h26t99u2jh694u7q3u3c2oaqma07oabe.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&access_type=offline
+  // https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8084/grantcode&response_type=code&client_id=529138320852-h26t99u2jh694u7q3u3c2oaqma07oabe.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&access_type=offline
   @GetMapping("/grantcode")
   public ResponseEntity<?> grantCode(
       @RequestParam("code") String code,
