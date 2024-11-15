@@ -8,11 +8,13 @@ CREATE TABLE IF NOT EXISTS `Orders` (
     transactionid INT NOT NULL,
     price DOUBLE(10, 2) NOT NULL,
     orderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    userid INT NOT NULL,
     FOREIGN KEY (shopItemid) REFERENCES ShopItem(id) ON DELETE SET NULL,
     INDEX idx_orders_orderStatus (orderStatus),
     INDEX idx_orders_deliveryAddress (deliveryAddress),
     INDEX idx_orders_shopItemid (shopItemid),
     INDEX idx_orders_transactionid (transactionid),
     INDEX idx_orders_price (price),
-    INDEX idx_orders_orderDate (orderDate)
+    INDEX idx_orders_orderDate (orderDate),
+    INDEX idx_orders_userid (userid)
 );

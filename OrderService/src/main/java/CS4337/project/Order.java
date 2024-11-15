@@ -7,6 +7,7 @@ public class Order {
   private int shopItemid;
   private int transactionid;
   private double price;
+  private int userId; // Added this field based on your unfinished line.
 
   public Order() {}
 
@@ -16,16 +17,17 @@ public class Order {
       String deliveryAddress,
       int shopItemid,
       int transactionid,
-      double price) {
+      double price,
+      int userId) {
     this.id = id;
     this.orderStatus = orderStatus;
     this.deliveryAddress = deliveryAddress;
     this.shopItemid = shopItemid;
     this.transactionid = transactionid;
     this.price = price;
+    this.userId = userId;
   }
 
-  // Getters and Setters
   public int getId() {
     return id;
   }
@@ -74,22 +76,11 @@ public class Order {
     this.price = price;
   }
 
-  @Override
-  public String toString() {
-    return "Order{"
-        + "id="
-        + id
-        + ", orderStatus="
-        + orderStatus
-        + ", deliveryAddress='"
-        + deliveryAddress
-        + '\''
-        + ", shopItemid="
-        + shopItemid
-        + ", transactionid="
-        + transactionid
-        + ", price="
-        + price
-        + '}';
+  public int getUserId() {
+    return userId;
+  }
+
+  public void setUserId(int userId) {
+    this.userId = userId;
   }
 }

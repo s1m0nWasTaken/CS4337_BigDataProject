@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -22,47 +21,63 @@ public class OrderService {
 
   @Autowired private RestTemplate restTemplate;
 
+  private final String PAYMENT_SERVICE_URL = "http://PAYMENT-SERVICE";
+
   public static void main(String[] args) {
     SpringApplication.run(OrderService.class, args);
   }
 
   @PostMapping("/order")
-  public ResponseEntity<Map<String, Object>> addOrder(@RequestBody Order order) {
+  public ResponseEntity<?> addOrder(@RequestBody Order order) {
     try {
-      // Check if the shopItem exists
-      String shopItemServiceUrl = "http://8082/shopItem?id=" + order.getShopItemid();
-      Map shopItemResponse = restTemplate.getForObject(shopItemServiceUrl, Map.class);
+      // Validate payment before making order
+      TransactionRequest transactionRequest = new TransactionRequest();
+      transactionRequest.setUserId(order.getUserId());
+      transactionRequest.setShopItemId(order.getShopItemid());
+      transactionRequest.setQuantity(1); // default as 1 for testing
 
-      if (shopItemResponse != null && shopItemResponse.containsKey("success")) {
-        String sqlInsert =
-            "INSERT INTO Orders (orderDate, orderStatus, deliveryAddress, shopItemid, transactionid, price) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(
-            sqlInsert,
-            LocalDateTime.now(),
-            "PENDING",
-            order.getDeliveryAddress(),
-            order.getShopItemid(),
-            order.getTransactionid(),
-            order.getPrice());
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(Map.of("success", 1, "message", "Order placed successfully"));
-      } else {
+      ResponseEntity<?> paymentResponse = validatePayment(transactionRequest);
+      if (paymentResponse.getStatusCode() != HttpStatus.OK) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("error", "Invalid ShopItem ID"));
+            .body("Payment validation failed: " + paymentResponse.getBody());
       }
+
+      // Create the order in the database
+      String sqlInsert =
+          "INSERT INTO Orders (orderDate, orderStatus, deliveryAddress, shopItemid, transactionid, price) "
+              + "VALUES (?, ?, ?, ?, ?, ?)";
+      jdbcTemplate.update(
+          sqlInsert,
+          LocalDateTime.now(),
+          "PENDING",
+          order.getDeliveryAddress(),
+          order.getShopItemid(),
+          order.getTransactionid(),
+          order.getPrice());
+
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .body(Map.of("success", 1, "message", "Order placed successfully"));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Failed to place order: " + e.getMessage()));
     }
   }
 
+  private ResponseEntity<?> validatePayment(TransactionRequest transactionRequest) {
+    try {
+      return restTemplate.postForEntity(
+          PAYMENT_SERVICE_URL + "/payment/create", transactionRequest, Object.class);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Error communicating with Payment Service: " + e.getMessage());
+    }
+  }
+
   @PutMapping("/order/{orderId}/status")
   public ResponseEntity<Map<String, Object>> updateOrderStatus(
       @PathVariable int orderId, @RequestParam String status) {
-
     try {
-      String sqlUpdate = "UPDATE Orders SET orderStatus = ? WHERE orderId = ?";
+      String sqlUpdate = "UPDATE Orders SET orderStatus = ? WHERE id = ?";
       int rowsAffected = jdbcTemplate.update(sqlUpdate, status, orderId);
 
       if (rowsAffected > 0) {
@@ -80,7 +95,6 @@ public class OrderService {
   @GetMapping("/orders")
   public ResponseEntity<Map<String, Object>> getOrders(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-
     try {
       String sqlQuery = "SELECT * FROM Orders LIMIT ? OFFSET ?";
       Object[] params = {size, page * size};
