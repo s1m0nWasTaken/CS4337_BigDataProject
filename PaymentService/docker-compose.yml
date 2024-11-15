@@ -3,10 +3,10 @@ services:
     image: mysql:latest
     container_name: paymentdb
     environment:
-      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: payment_service
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${PAYMENT_MYSQL_SERVER_PORT}:${PAYMENT_MYSQL_CONTAINER_PORT}"
     volumes:
@@ -17,11 +17,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${PAYMENT_CONTAINER}
+    container_name: payment-service
     depends_on:
       - mysql
     networks:
-      - ${NETWORK_NAME}
+      - netw
     ports:
       - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
     env_file:
@@ -30,4 +30,3 @@ services:
 networks:
   netw:
     driver: bridge
-    external: true

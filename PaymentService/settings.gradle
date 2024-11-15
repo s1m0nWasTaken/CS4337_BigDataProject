@@ -1,7 +1,0 @@
-rootProject.name = 'Project'
-include 'UserService'
-include 'MessagingService'
-include 'ShopService'
-include 'ConfigService'
-include 'AuthService'
-include 'PaymentService'
