@@ -25,7 +25,7 @@ public class MessagingServiceTest {
 
   @Mock private MessageRepository messageRepository;
 
-  @InjectMocks private MessagingService messagingService;
+  @InjectMocks private MessagingServiceController messagingService;
 
   @Test
   public void testSendMessageSuccess() {
