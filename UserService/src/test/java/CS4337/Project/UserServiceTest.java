@@ -1,133 +1,112 @@
 package CS4337.Project;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @Mock
-    private JdbcTemplate jdbcTemplate;
+  @Mock private JdbcTemplate jdbcTemplate;
 
-    @InjectMocks
-    private UserService userService;
+  @InjectMocks private UserService userService;
 
-    @Test
-    public void testGetAllUsers() {
-        
-        List<User> users = Arrays.asList(
-            new User(1, "admin", "AdminUser", "admin@example.com", "Admin Address", false),
-            new User(2, "customer", "CustomerUser", "customer@example.com", "Customer Address", false)
-        );
+  private User testUser;
 
-        when(jdbcTemplate.query(anyString(), any(UserRowMapper.class))).thenReturn(users);
+  @BeforeEach
+  public void setup() {
+    testUser = new User(UserType.customer, "johndoe", "john@example.com", "123 Main St");
+  }
 
-        
-        ResponseEntity<Map<String, Object>> response = userService.users(null);
+  @Test
+  public void testGetAllUsers() {
+    when(jdbcTemplate.query(anyString(), any(UserRowMapper.class))).thenReturn(List.of(testUser));
 
-        
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(users, response.getBody().get("success"));
-        //Test to verify if the UserService retrieves all users from the database.
-        //This test ensures that when no filter is applied, the service correctly fetches all users.
-    }
+    ResponseEntity<Map<String, Object>> response = userService.users(null);
 
-    @Test
-public void testAddUser() {
-    
-    User newUser = new User(UserType.customer, "NewUser", "newuser@example.com", "New Address");
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(List.of(testUser), response.getBody().get("success"));
+  }
+
+  @Test
+  public void testAddUser() {
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("NewUser"),
-        eq("newuser@example.com"),
-        eq("New Address"),
-        eq(false)
-    )).thenReturn(1);
+            anyString(),
+            eq(testUser.getUserType().name()),
+            eq(testUser.getUsername()),
+            eq(testUser.getEmail()),
+            eq(testUser.getAddress()),
+            eq(false)))
+        .thenReturn(1);
 
-    
-    ResponseEntity<Map<String, Object>> response = userService.addUser(newUser);
+    ResponseEntity<Map<String, Object>> response = userService.addUser(testUser);
 
-    
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(1, response.getBody().get("success"));
-    //Test to verify if the UserService successfully adds a new user.
-    //This test simulates adding a user to the database and checks for a successful response.
-}
+  }
 
+  @Test
+  public void testGetUserById() {
+    when(jdbcTemplate.queryForObject(anyString(), any(UserRowMapper.class), eq(1)))
+        .thenReturn(testUser);
 
-@Test
-public void testUpdateUser() {
-    
-    int userId = 1;
-    User updates = new User();
-    updates.setUsername("UpdatedUser");
-    updates.setEmail("updateduser@example.com");
+    ResponseEntity<Map<String, Object>> response = userService.getUser(1);
 
-    when(jdbcTemplate.update(
-        anyString(),
-        eq("UpdatedUser"),
-        eq("updateduser@example.com"),
-        eq(userId)
-    )).thenReturn(1);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(testUser, response.getBody().get("success"));
+  }
 
-    
-    ResponseEntity<Map<String, Object>> response = userService.updateUser(userId, updates);
+  @Test
+  public void testGetUserByEmail() {
+    when(jdbcTemplate.queryForObject(anyString(), any(UserRowMapper.class), eq("john@example.com")))
+        .thenReturn(testUser);
 
-    
+    ResponseEntity<Map<String, Object>> response = userService.getUserByEmail("john@example.com");
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(testUser, response.getBody().get("success"));
+  }
+
+  @Test
+  public void testDeleteUser() {
+    when(jdbcTemplate.update(anyString(), eq(1))).thenReturn(1);
+
+    ResponseEntity<Map<String, String>> response = userService.deleteUser(1);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("User deleted successfully", response.getBody().get("message"));
+  }
+
+  @Test
+  public void testUpdateUser() {
+    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+
+    ResponseEntity<Map<String, Object>> response = userService.updateUser(1, testUser);
+
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("1", response.getBody().get("success"));
-    //Test to verify if the UserService correctly updates an existing user's details.
-    //This test ensures that the update operation modifies the username and email fields as expected.
-}
+  }
 
+  @Test
+  public void testBanUser() {
+    when(jdbcTemplate.update(anyString(), eq(true), eq(1))).thenReturn(1);
 
-    @Test
-    public void testBanUser() {
-        int userId = 1;
-        Map<String, String> requestBody = Map.of("isHidden", "true");
+    ResponseEntity<Map<String, Object>> response =
+        userService.banUser(1, Map.of("isHidden", "true"));
 
-        when(jdbcTemplate.update(anyString(), eq(true), eq(userId))).thenReturn(1);
-
-        ResponseEntity<Map<String, Object>> response = userService.banUser(userId, requestBody);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(true, response.getBody().get("User hidden"));
-        //Test to verify if the UserService successfully bans (hides) a user.
-        //This test checks that the user is marked as hidden in the database with the correct flag.
-    }
-
-    @Test
-    public void testGetAllUsersWithHiddenFilter() {
-        List<User> users = Arrays.asList(
-            new User(1, "admin", "AdminUser", "admin@example.com", "Admin Address", true)
-        );
-
-        when(jdbcTemplate.query(anyString(), any(UserRowMapper.class), eq(true))).thenReturn(users);
-
-        ResponseEntity<Map<String, Object>> response = userService.users(true);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(users, response.getBody().get("success"));
-        //Test to verify if the UserService retrieves only hidden users when the isHidden filter is applied.
-        //This test ensures that the service respects the filter and fetches the appropriate users.
-    }
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(true, response.getBody().get("User hidden"));
+  }
 }
