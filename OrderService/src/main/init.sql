@@ -1,4 +1,4 @@
-USE shop_service;
+USE order_service;
 
 CREATE TABLE IF NOT EXISTS `Orders` (
     id INT AUTO_INCREMENT PRIMARY KEY,
