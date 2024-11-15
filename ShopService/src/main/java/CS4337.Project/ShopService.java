@@ -26,11 +26,11 @@ public class ShopService {
 
   @GetMapping("/shop")
   public ResponseEntity<Map<String, Object>> shop(
-          @RequestParam(required = false) String shopName,
-          @RequestParam(required = false) String description,
-          @RequestParam(required = false) Integer id,
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "50") int pageSize) {
+      @RequestParam(required = false) String shopName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) Integer id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int pageSize) {
 
     int maxItemsShown = 50;
 
@@ -75,16 +75,16 @@ public class ShopService {
     // needs user access checking
     try {
       String sqlInsert =
-              "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
-                      + "VALUES (?, ?, ?, ?, ?, ?)";
+          "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
+              + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
-              sqlInsert,
-              shop.getShopOwnerid(),
-              shop.getShopName(),
-              shop.getImageData(),
-              shop.getDescription(),
-              shop.getShopType().name(),
-              shop.getShopEmail());
+          sqlInsert,
+          shop.getShopOwnerid(),
+          shop.getShopName(),
+          shop.getImageData(),
+          shop.getDescription(),
+          shop.getShopType().name(),
+          shop.getShopEmail());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
@@ -93,12 +93,12 @@ public class ShopService {
 
   @GetMapping("/shopItem")
   public ResponseEntity<Map<String, Object>> shopItem(
-          @RequestParam(required = false) String itemName,
-          @RequestParam(required = false) String description,
-          @RequestParam(required = false) Double minPrice,
-          @RequestParam(required = false) Double maxPrice,
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "50") int pageSize) {
+      @RequestParam(required = false) String itemName,
+      @RequestParam(required = false) String description,
+      @RequestParam(required = false) Double minPrice,
+      @RequestParam(required = false) Double maxPrice,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int pageSize) {
 
     // Set maxItemsShown to limit the max number of items shown
     int maxItemsShown = 50;
@@ -145,7 +145,7 @@ public class ShopService {
     try {
       // Execute the query
       List<Map<String, Object>> shopItems =
-              jdbcTemplate.queryForList(sql.toString(), params.toArray());
+          jdbcTemplate.queryForList(sql.toString(), params.toArray());
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", shopItems));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -157,16 +157,16 @@ public class ShopService {
     // need to add user access checking
     try {
       String sqlInsert =
-              "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
-                      + "VALUES (?, ?, ?, ?, ?, ?)";
+          "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
+              + "VALUES (?, ?, ?, ?, ?, ?)";
       jdbcTemplate.update(
-              sqlInsert,
-              shopItem.getShopid(),
-              shopItem.getPrice(),
-              shopItem.getItemName(),
-              shopItem.getStock(),
-              shopItem.getPicture(),
-              shopItem.getDescription());
+          sqlInsert,
+          shopItem.getShopid(),
+          shopItem.getPrice(),
+          shopItem.getItemName(),
+          shopItem.getStock(),
+          shopItem.getPicture(),
+          shopItem.getDescription());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
@@ -313,7 +313,7 @@ public class ShopService {
 
   @PutMapping("shopItem/ban/{id}")
   public ResponseEntity<Map<String, Object>> banShopItem(
-          @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
+      @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
     try {
       String hiddenStr = requestBody.get("isHidden");
       Boolean hidden = (hiddenStr.equals("true") ? true : false);
