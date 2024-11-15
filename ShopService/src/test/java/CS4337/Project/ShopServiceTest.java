@@ -1,154 +1,168 @@
 package CS4337.Project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.*;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ShopService.class)
 public class ShopServiceTest {
 
-  @Mock private JdbcTemplate jdbcTemplate;
+  @Autowired private MockMvc mockMvc;
 
-  @InjectMocks private ShopService shopService;
+  @MockBean private ShopService shopService;
 
-  @BeforeEach
-  public void setUp() {
-    MockitoAnnotations.openMocks(this);
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Test
+  public void testGetShops() throws Exception {
+    Map<String, Object> shop =
+        Map.of("id", 1, "shopName", "Test Shop", "description", "A test shop", "shopOwnerid", 123);
+
+    when(shopService.shop(any(), any(), any(), eq(0), eq(50)))
+        .thenReturn(ResponseEntity.ok(Map.of("success", List.of(shop))));
+
+    mockMvc
+        .perform(get("/shop?page=0&pageSize=50"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success[0].id").value(1))
+        .andExpect(jsonPath("$.success[0].shopName").value("Test Shop"));
   }
 
   @Test
-  public void testGetAllShops_Success() {
-    List<Map<String, Object>> mockShops = new ArrayList<>();
-    mockShops.add(Map.of("id", 1, "shopName", "Test Shop"));
+  public void testAddShop() throws Exception {
+    Shop shop = new Shop();
+    shop.setShopName("Test Shop");
+    shop.setDescription("A test shop");
+    shop.setShopOwnerid(123);
 
-    when(jdbcTemplate.queryForList("SELECT * FROM Shop")).thenReturn(mockShops);
+    when(shopService.addShop(any())).thenReturn(Map.of("success", 1));
 
-    ResponseEntity<Map<String, Object>> response = shopService.shop();
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(mockShops, response.getBody().get("success"));
+    mockMvc
+        .perform(
+            post("/shop")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(shop)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1));
   }
 
   @Test
-  public void testAddShop_Success() {
-    Shop shop =
-        new Shop(
-            1, 1, "ShopName", "Description", "ImageData", ShopType.CLOTHING, "email@example.com");
+  public void testUpdateShop() throws Exception {
+    Shop shop = new Shop();
+    shop.setShopName("Updated Shop");
+    shop.setDescription("Updated description");
 
-    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+    when(shopService.updateShop(eq(1), any()))
+        .thenReturn(Map.of("success", 1, "message", "Shop updated successfully"));
 
-    Map<String, Object> response = shopService.addShop(shop);
-
-    assertEquals(1, response.get("success"));
+    mockMvc
+        .perform(
+            put("/shop/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(shop)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1))
+        .andExpect(jsonPath("$.message").value("Shop updated successfully"));
   }
 
   @Test
-  public void testGetAllShopItems_Success() {
-    List<Map<String, Object>> mockItems = new ArrayList<>();
-    mockItems.add(Map.of("id", 1, "itemName", "Test Item"));
+  public void testDeleteShop() throws Exception {
+    when(shopService.deleteShop(eq(1)))
+        .thenReturn(Map.of("success", 1, "message", "Shop deleted successfully"));
 
-    when(jdbcTemplate.queryForList("SELECT * FROM ShopItem")).thenReturn(mockItems);
-
-    ResponseEntity<Map<String, Object>> response = shopService.shopItem();
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(mockItems, response.getBody().get("success"));
+    mockMvc
+        .perform(delete("/shop/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1))
+        .andExpect(jsonPath("$.message").value("Shop deleted successfully"));
   }
 
   @Test
-  public void testAddShopItem_Success() {
+  public void testGetShopItems() throws Exception {
+    Map<String, Object> shopItem = Map.of("id", 1, "itemName", "Test Item", "price", 99.99);
+
+    when(shopService.shopItem(any(), any(), any(), any(), eq(0), eq(50)))
+        .thenReturn(ResponseEntity.ok(Map.of("success", List.of(shopItem))));
+
+    mockMvc
+        .perform(get("/shopItem?page=0&pageSize=50"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success[0].id").value(1))
+        .andExpect(jsonPath("$.success[0].itemName").value("Test Item"))
+        .andExpect(jsonPath("$.success[0].price").value(99.99));
+  }
+
+  @Test
+  public void testAddShopItem() throws Exception {
     ShopItem shopItem = new ShopItem();
+    shopItem.setItemName("Test Item");
+    shopItem.setPrice(99.99);
     shopItem.setShopid(1);
-    shopItem.setPrice(20.0);
-    shopItem.setItemName("ItemName");
-    shopItem.setStock(10);
-    shopItem.setPicture("PictureData");
-    shopItem.setDescription("Description");
 
-    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+    when(shopService.addShopItem(any())).thenReturn(Map.of("success", 1));
 
-    Map<String, Object> response = shopService.addShopItem(shopItem);
-
-    assertEquals(1, response.get("success"));
+    mockMvc
+        .perform(
+            post("/shopItem")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(shopItem)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1));
   }
 
   @Test
-  public void testUpdateShopItem_Success() {
+  public void testUpdateShopItem() throws Exception {
     ShopItem shopItem = new ShopItem();
-    shopItem.setPrice(15.0);
-    shopItem.setItemName("NewItem");
-    shopItem.setStock(5);
-    shopItem.setPicture("NewPicture");
-    shopItem.setDescription("NewDescription");
+    shopItem.setItemName("Updated Item");
+    shopItem.setPrice(89.99);
 
-    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
+    when(shopService.updateShopItem(eq(1), any()))
+        .thenReturn(Map.of("success", 1, "message", "Shop item updated successfully"));
 
-    Map<String, Object> response = shopService.updateShopItem(1, shopItem);
-
-    assertEquals(1, response.get("success"));
-    assertEquals("Shop item updated successfully", response.get("message"));
+    mockMvc
+        .perform(
+            put("/shopItem/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(shopItem)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1))
+        .andExpect(jsonPath("$.message").value("Shop item updated successfully"));
   }
 
   @Test
-  public void testUpdateShop_Success() {
-    Shop shop =
-        new Shop(
-            1,
-            1,
-            "New Shop",
-            "NewDescription",
-            "NewImage",
-            ShopType.ELECTRONICS,
-            "new_email@example.com");
+  public void testDeleteShopItem() throws Exception {
+    when(shopService.deleteShopItem(eq(1)))
+        .thenReturn(Map.of("success", 1, "message", "Shop item deleted successfully"));
 
-    when(jdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(1);
-
-    Map<String, Object> response = shopService.updateShop(1, shop);
-
-    assertEquals(1, response.get("success"));
-    assertEquals("Shop updated successfully", response.get("message"));
+    mockMvc
+        .perform(delete("/shopItem/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(1))
+        .andExpect(jsonPath("$.message").value("Shop item deleted successfully"));
   }
 
   @Test
-  public void testDeleteShop_Success() {
-    when(jdbcTemplate.update(anyString(), eq(1))).thenReturn(1);
+  public void testBanShopItem() throws Exception {
+    when(shopService.banShopItem(eq(1), any()))
+        .thenReturn(ResponseEntity.ok(Map.of("Shop item hidden", true)));
 
-    Map<String, Object> response = shopService.deleteShop(1);
-
-    assertEquals(1, response.get("success"));
-    assertEquals("Shop deleted successfully", response.get("message"));
-  }
-
-  @Test
-  public void testDeleteShopItem_Success() {
-    when(jdbcTemplate.update(anyString(), eq(1))).thenReturn(1);
-
-    Map<String, Object> response = shopService.deleteShopItem(1);
-
-    assertEquals(1, response.get("success"));
-    assertEquals("Shop item deleted successfully", response.get("message"));
-  }
-
-  @Test
-  public void testBanShopItem_Success() {
-    Map<String, String> requestBody = Map.of("isHidden", "true");
-
-    when(jdbcTemplate.update(anyString(), eq(true), eq(1))).thenReturn(1);
-
-    ResponseEntity<Map<String, Object>> response = shopService.banShopItem(1, requestBody);
-
-    assertEquals(200, response.getStatusCodeValue());
-    assertEquals(true, response.getBody().get("Shop item hidden"));
+    mockMvc
+        .perform(
+            put("/shopItem/ban/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("isHidden", "true"))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$['Shop item hidden']").value(true));
   }
 }
