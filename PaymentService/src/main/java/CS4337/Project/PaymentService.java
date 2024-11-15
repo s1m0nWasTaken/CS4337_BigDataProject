@@ -70,7 +70,7 @@ public class PaymentService {
 
   private ResponseEntity<ShopItem> getShopItemById(int shopItemId) {
     try {
-      return restTemplate.getForEntity(SHOP_SERVICE_URL + "/item/" + shopItemId, ShopItem.class);
+      return restTemplate.getForEntity(SHOP_SERVICE_URL + "shopItem/" + shopItemId, ShopItem.class);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
