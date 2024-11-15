@@ -21,7 +21,7 @@ public class OrderService {
 
   @Autowired private RestTemplate restTemplate;
 
-  private final String PAYMENT_SERVICE_URL = "http://PAYMENT-SERVICE";
+  private final String PAYMENT_SERVICE_URL = "http://PAYMENTSERVICE";
 
   public static void main(String[] args) {
     SpringApplication.run(OrderService.class, args);
