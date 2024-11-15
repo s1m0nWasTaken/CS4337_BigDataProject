@@ -21,7 +21,6 @@ public class Transaction {
 
   private int sourceUserId;
   private int shopItemId;
-  private int quantity;
   private double amount;
   private String transactionStatus;
 
