@@ -13,7 +13,7 @@ services:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
 
   payment-service:
-    image: paymentsvc:latest
+    image: paymentservice:latest
     build:
       context: .
       dockerfile: Dockerfile

@@ -95,7 +95,8 @@ public class ShopService {
   public ResponseEntity<Map<String, Object>> shopItemById(@PathVariable("id") int id) {
     try {
       ShopItem shopItem =
-              jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?", new ShopItemRowMapper(), id);
+          jdbcTemplate.queryForObject(
+              "SELECT * FROM `ShopItem` WHERE id = ?", new ShopItemRowMapper(), id);
 
       return ResponseEntity.ok(Map.of("success", shopItem));
     } catch (DataAccessException e) {
