@@ -27,35 +27,25 @@ public class PaymentService {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid shop item");
     }
 
-    System.out.println("0");
-
     System.out.println(shopItemResponse.getBody());
     Map<String, ShopItem> shopItemHldr = shopItemResponse.getBody();
     ShopItem shopItem = shopItemHldr.get("success");
-
-    System.out.println("1");
 
     if (shopItem.getStock() < request.getQuantity()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient stock");
     }
 
-    System.out.println("2");
     Transaction transaction = new Transaction();
     transaction.setSourceUserId(request.getUserId());
-    transaction.setShopItemId(request.getShopItemId());
     transaction.setAmount(shopItem.getPrice() * request.getQuantity());
     transaction.setTransactionStatus("PENDING");
     transaction.setTimeStamp(new Date());
-    System.out.println("3");
-
     transactionRepository.save(transaction);
 
-    System.out.println("4");
     int newQuantity = shopItem.getStock() - request.getQuantity();
     updateShopItemStock(shopItem.getId(), newQuantity);
 
-    System.out.println("5");
-    transaction.setTransactionStatus("COMPLETED");
+    transaction.setTransactionStatus("SUCCESS");
     transactionRepository.save(transaction);
 
     return ResponseEntity.ok(transaction);

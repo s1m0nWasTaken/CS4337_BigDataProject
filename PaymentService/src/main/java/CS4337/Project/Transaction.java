@@ -20,7 +20,6 @@ public class Transaction {
   private int id;
 
   private int sourceUserId;
-  private int shopItemId;
   private double amount;
   private String transactionStatus;
 
