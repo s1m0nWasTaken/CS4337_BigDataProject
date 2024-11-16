@@ -1,7 +1,5 @@
 package CS4337.Project;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -113,219 +111,204 @@ public class UserServiceTest {
     assertEquals(true, response.getBody().get("User hidden"));
   }
 
-
   @Test
-public void testAddUserMissingUsername() {
+  public void testAddUserMissingUsername() {
     User invalidUser = new User(UserType.customer, "", "john@example.com", "123 Main St");
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq(""),
-        eq("john@example.com"),
-        eq("123 Main St"),
-        eq(false)
-    )).thenReturn(1);
+            anyString(),
+            eq(UserType.customer.name()),
+            eq(""),
+            eq("john@example.com"),
+            eq("123 Main St"),
+            eq(false)))
+        .thenReturn(1);
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(invalidUser);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(1, response.getBody().get("success"));
-}
+  }
 
-@Test
-public void testAddUserDuplicateEmail() {
+  @Test
+  public void testAddUserDuplicateEmail() {
     User duplicateUser = new User(UserType.customer, "johndoe", "john@example.com", "123 Main St");
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("johndoe"),
-        eq("john@example.com"),
-        eq("123 Main St"),
-        eq(false)
-    )).thenThrow(new DataAccessException("Duplicate email") {});
+            anyString(),
+            eq(UserType.customer.name()),
+            eq("johndoe"),
+            eq("john@example.com"),
+            eq("123 Main St"),
+            eq(false)))
+        .thenThrow(new DataAccessException("Duplicate email") {});
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(duplicateUser);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Duplicate email", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testAddUserWithMissingAddress() {
+  @Test
+  public void testAddUserWithMissingAddress() {
     User userWithMissingAddress = new User(UserType.customer, "johndoe", "john@example.com", null);
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("johndoe"),
-        eq("john@example.com"),
-        eq(null),
-        eq(false)
-    )).thenThrow(new DataAccessException("Address is required") {});
+            anyString(),
+            eq(UserType.customer.name()),
+            eq("johndoe"),
+            eq("john@example.com"),
+            eq(null),
+            eq(false)))
+        .thenThrow(new DataAccessException("Address is required") {});
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(userWithMissingAddress);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Address is required", response.getBody().get("error"));
-}
+  }
 
-
-@Test
-public void testAddSpecialCharactersInUsername() {
+  @Test
+  public void testAddSpecialCharactersInUsername() {
     User specialCharUser = new User(UserType.customer, "us$#@!", "john@example.com", "123 Main St");
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("us$#@!"),
-        eq("john@example.com"),
-        eq("123 Main St"),
-        eq(false)
-    )).thenReturn(1);
+            anyString(),
+            eq(UserType.customer.name()),
+            eq("us$#@!"),
+            eq("john@example.com"),
+            eq("123 Main St"),
+            eq(false)))
+        .thenReturn(1);
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(specialCharUser);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(1, response.getBody().get("success"));
-}
+  }
 
-@Test
-public void testAddUserWithLongAddress() {
+  @Test
+  public void testAddUserWithLongAddress() {
     String longAddress = "A".repeat(1000);
     User user = new User(UserType.customer, "johndoe", "john@example.com", longAddress);
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("johndoe"),
-        eq("john@example.com"),
-        eq(longAddress),
-        eq(false)
-    )).thenThrow(new DataAccessException("Address too long") {});
+            anyString(),
+            eq(UserType.customer.name()),
+            eq("johndoe"),
+            eq("john@example.com"),
+            eq(longAddress),
+            eq(false)))
+        .thenThrow(new DataAccessException("Address too long") {});
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(user);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Address too long", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testAddUserDuplicateUsername() {
-    User duplicateUser = new User(UserType.customer, "duplicateuser", "john@example.com", "123 Main St");
+  @Test
+  public void testAddUserDuplicateUsername() {
+    User duplicateUser =
+        new User(UserType.customer, "duplicateuser", "john@example.com", "123 Main St");
 
     when(jdbcTemplate.update(
-        anyString(),
-        eq(UserType.customer.name()),
-        eq("duplicateuser"),
-        eq("john@example.com"),
-        eq("123 Main St"),
-        eq(false)
-    )).thenThrow(new DataAccessException("Duplicate username") {});
+            anyString(),
+            eq(UserType.customer.name()),
+            eq("duplicateuser"),
+            eq("john@example.com"),
+            eq("123 Main St"),
+            eq(false)))
+        .thenThrow(new DataAccessException("Duplicate username") {});
 
     ResponseEntity<Map<String, Object>> response = userService.addUser(duplicateUser);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Duplicate username", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testGetUsersWithNullFilter() {
-    List<User> allUsers = List.of(
-        new User(1, "customer", "john1", "john1@example.com", "123 Main St", false),
-        new User(2, "admin", "john2", "john2@example.com", "1234 Main St", true)
-    );
+  @Test
+  public void testGetUsersWithNullFilter() {
+    List<User> allUsers =
+        List.of(
+            new User(1, "customer", "john1", "john1@example.com", "123 Main St", false),
+            new User(2, "admin", "john2", "john2@example.com", "1234 Main St", true));
 
-    when(jdbcTemplate.query(eq("SELECT * FROM User"), any(UserRowMapper.class))).thenReturn(allUsers);
+    when(jdbcTemplate.query(eq("SELECT * FROM User"), any(UserRowMapper.class)))
+        .thenReturn(allUsers);
 
     ResponseEntity<Map<String, Object>> response = userService.users(null);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(allUsers, response.getBody().get("success"));
-}
+  }
 
-@Test
-public void testGetHiddenUsersOnly() {
-    List<User> hiddenUsers = List.of(
-        new User(1, "customer", "hiddenuser", "john@example.com", "Unknown", true)
-    );
+  @Test
+  public void testGetHiddenUsersOnly() {
+    List<User> hiddenUsers =
+        List.of(new User(1, "customer", "hiddenuser", "john@example.com", "Unknown", true));
 
     when(jdbcTemplate.query(
-        eq("SELECT * FROM User WHERE isHidden = ?"),
-        any(UserRowMapper.class),
-        eq(true))
-    ).thenReturn(hiddenUsers);
+            eq("SELECT * FROM User WHERE isHidden = ?"), any(UserRowMapper.class), eq(true)))
+        .thenReturn(hiddenUsers);
 
     ResponseEntity<Map<String, Object>> response = userService.users(true);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(hiddenUsers, response.getBody().get("success"));
-}
+  }
 
-
-@Test
-public void testGetUserByEmptyEmail() {
+  @Test
+  public void testGetUserByEmptyEmail() {
     when(jdbcTemplate.queryForObject(
-        eq("SELECT * FROM User WHERE email = ?"),
-        any(UserRowMapper.class),
-        eq(""))
-    ).thenThrow(new DataAccessException("User not found") {});
+            eq("SELECT * FROM User WHERE email = ?"), any(UserRowMapper.class), eq("")))
+        .thenThrow(new DataAccessException("User not found") {});
 
     ResponseEntity<Map<String, Object>> response = userService.getUserByEmail("");
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("User not found", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testUpdateUserToDuplicateEmail() {
+  @Test
+  public void testUpdateUserToDuplicateEmail() {
     User updates = new User();
     updates.setEmail("duplicate@example.com");
 
-    when(jdbcTemplate.update(
-        anyString(),
-        eq("duplicate@example.com"),
-        eq(1)
-    )).thenThrow(new DataAccessException("Email already in use") {});
+    when(jdbcTemplate.update(anyString(), eq("duplicate@example.com"), eq(1)))
+        .thenThrow(new DataAccessException("Email already in use") {});
 
     ResponseEntity<Map<String, Object>> response = userService.updateUser(1, updates);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Email already in use", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testUpdateUserWithNullFields() {
+  @Test
+  public void testUpdateUserWithNullFields() {
     int userId = 1;
     User updates = new User();
 
-    when(jdbcTemplate.update(
-        anyString(),
-        eq(userId)
-    )).thenReturn(0);
+    when(jdbcTemplate.update(anyString(), eq(userId))).thenReturn(0);
 
     ResponseEntity<Map<String, Object>> response = userService.updateUser(userId, updates);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("0", response.getBody().get("success"));
-}
+  }
 
-@Test
-public void testDeleteNonExistentUser() {
-    when(jdbcTemplate.update(
-        eq("DELETE FROM User WHERE id = ?"),
-        eq(999))
-    ).thenReturn(0);
+  @Test
+  public void testDeleteNonExistentUser() {
+    when(jdbcTemplate.update(eq("DELETE FROM User WHERE id = ?"), eq(999))).thenReturn(0);
 
     ResponseEntity<Map<String, String>> response = userService.deleteUser(999);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("User deleted successfully", response.getBody().get("message"));
-}
+  }
 
-@Test
-public void testDeleteUserNonNumericID() {
+  @Test
+  public void testDeleteUserNonNumericID() {
     when(jdbcTemplate.update(eq("DELETE FROM User WHERE id = ?"), eq(0)))
         .thenThrow(new DataAccessException("Invalid ID") {});
 
@@ -333,10 +316,10 @@ public void testDeleteUserNonNumericID() {
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Invalid ID", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testBanUserAlreadyBanned() {
+  @Test
+  public void testBanUserAlreadyBanned() {
     Map<String, String> requestBody = Map.of("isHidden", "true");
 
     when(jdbcTemplate.update(anyString(), eq(true), eq(1))).thenReturn(0);
@@ -345,10 +328,10 @@ public void testBanUserAlreadyBanned() {
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("bad request", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testBanUserWithoutId() {
+  @Test
+  public void testBanUserWithoutId() {
     Map<String, String> requestBody = Map.of("isHidden", "true");
 
     when(jdbcTemplate.update(anyString(), eq(true), eq(0)))
@@ -358,10 +341,10 @@ public void testBanUserWithoutId() {
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Invalid user ID", response.getBody().get("error"));
-}
+  }
 
-@Test
-public void testGetUsersWithInvalidQuery() {
+  @Test
+  public void testGetUsersWithInvalidQuery() {
     when(jdbcTemplate.query(anyString(), any(UserRowMapper.class)))
         .thenThrow(new DataAccessException("Invalid query") {});
 
@@ -369,8 +352,5 @@ public void testGetUsersWithInvalidQuery() {
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Invalid query", response.getBody().get("error"));
-}
-
-
-
+  }
 }
