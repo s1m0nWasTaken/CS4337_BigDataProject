@@ -1,6 +1,7 @@
 package CS4337.project;
 
-import java.time.LocalDateTime;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,32 +42,33 @@ public class OrderService {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body("Payment validation failed: " + paymentResponse.getBody());
       }
-
-      // Create the order in the database
+      Transaction t = (Transaction) paymentResponse.getBody();
       String sqlInsert =
-          "INSERT INTO Orders (orderDate, orderStatus, deliveryAddress, shopItemid, transactionid, price) "
-              + "VALUES (?, ?, ?, ?, ?, ?)";
+          "INSERT INTO `Orders` (orderDate, orderStatus, deliveryAddress, shopItemid, transactionid, price, userid) "
+              + "VALUES (?,?,?,?,?,?,?)";
+
       jdbcTemplate.update(
           sqlInsert,
-          LocalDateTime.now(),
-          "PENDING",
+          new Timestamp(System.currentTimeMillis()),
+          "PROCESSING",
           order.getDeliveryAddress(),
           order.getShopItemid(),
-          order.getTransactionid(),
-          order.getPrice());
-
+          t.getId(),
+          t.getAmount(),
+          t.getSourceUserId());
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(Map.of("success", 1, "message", "Order placed successfully"));
     } catch (Exception e) {
+      System.out.println(e.getClass());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(Map.of("error", "Failed to place order: " + e.getMessage()));
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
   private ResponseEntity<?> validatePayment(TransactionRequest transactionRequest) {
     try {
       return restTemplate.postForEntity(
-          PAYMENT_SERVICE_URL + "/payment/create", transactionRequest, Object.class);
+          PAYMENT_SERVICE_URL + "/payment/create", transactionRequest, Transaction.class);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Error communicating with Payment Service: " + e.getMessage());
@@ -106,5 +108,53 @@ public class OrderService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Failed to retrieve orders: " + e.getMessage()));
     }
+  }
+}
+
+class Transaction {
+  private int id;
+  private int sourceUserId;
+  private double amount;
+  private String transactionStatus;
+  private Date timeStamp;
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public int getSourceUserId() {
+    return sourceUserId;
+  }
+
+  public void setSourceUserId(int sourceUserId) {
+    this.sourceUserId = sourceUserId;
+  }
+
+  public Date getTimeStamp() {
+    return timeStamp;
+  }
+
+  public void setTimeStamp(Date timeStamp) {
+    this.timeStamp = timeStamp;
+  }
+
+  public double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(double amount) {
+    this.amount = amount;
+  }
+
+  public String getTransactionStatus() {
+    return transactionStatus;
+  }
+
+  public void setTransactionStatus(String transactionStatus) {
+    this.transactionStatus = transactionStatus;
   }
 }

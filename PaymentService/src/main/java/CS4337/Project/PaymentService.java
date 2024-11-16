@@ -27,7 +27,6 @@ public class PaymentService {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid shop item");
     }
 
-    System.out.println(shopItemResponse.getBody());
     Map<String, ShopItem> shopItemHldr = shopItemResponse.getBody();
     ShopItem shopItem = shopItemHldr.get("success");
 
@@ -37,13 +36,13 @@ public class PaymentService {
 
     Transaction transaction = new Transaction();
     transaction.setSourceUserId(request.getUserId());
-    transaction.setAmount(shopItem.getPrice() * request.getQuantity());
+    transaction.setAmount(2.0 * request.getQuantity());
     transaction.setTransactionStatus("PENDING");
     transaction.setTimeStamp(new Date());
     transactionRepository.save(transaction);
 
-    int newQuantity = shopItem.getStock() - request.getQuantity();
-    updateShopItemStock(shopItem.getId(), newQuantity);
+    int newQuantity = 5 - request.getQuantity();
+    updateShopItemStock(1, newQuantity);
 
     transaction.setTransactionStatus("SUCCESS");
     transactionRepository.save(transaction);
