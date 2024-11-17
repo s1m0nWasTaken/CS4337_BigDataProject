@@ -91,6 +91,19 @@ public class ShopService {
     }
   }
 
+  @GetMapping("/shopItem/{id}")
+  public ResponseEntity<Map<String, Object>> shopItemById(@PathVariable("id") int id) {
+    try {
+      ShopItem shopItem =
+          jdbcTemplate.queryForObject(
+              "SELECT * FROM `ShopItem` WHERE id = ?", new ShopItemRowMapper(), id);
+
+      return ResponseEntity.ok(Map.of("success", shopItem));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @GetMapping("/shopItem")
   public ResponseEntity<Map<String, Object>> shopItem(
       @RequestParam(required = false) String itemName,
