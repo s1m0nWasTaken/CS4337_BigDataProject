@@ -24,26 +24,18 @@ public class PaymentService {
   // dont need user checking here bc auth wouldalready have done that
   public ResponseEntity<?> createTransaction(TransactionRequest request) {
     // TODO: put back
-    /*ResponseEntity<Map<String, ShopItem>> shopItemResponse =
+    ResponseEntity<Map<String, ShopItem>> shopItemResponse =
         getShopItemById(request.getShopItemId());
     if (shopItemResponse.getStatusCode() != HttpStatus.OK) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid shop item");
     }
 
     Map<String, ShopItem> shopItemHldr = shopItemResponse.getBody();
-    ShopItem shopItem = shopItemHldr.get("success");*/
+    ShopItem shopItem = shopItemHldr.get("success");
 
-    ShopItem shopItem = new ShopItem();
-    shopItem.setItemName("book");
-    shopItem.setDescription("desc");
-    shopItem.setPrice(100);
-    shopItem.setId(3);
-    shopItem.setStock(10);
-    shopItem.setPicture("pic");
-    shopItem.setShopid(4);
-    /*if (shopItem.getStock() < request.getQuantity()) {
+    if (shopItem.getStock() < request.getQuantity()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient stock");
-    }*/
+    }
 
     Transaction transaction = new Transaction();
     transaction.setSourceUserId(request.getUserId());
@@ -77,12 +69,8 @@ public class PaymentService {
 
       HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
       ResponseEntity<Map<String, ShopItem>> resJson =
-          restTemplate.exchange(
-              SHOP_SERVICE_URL + "shopItem/{id}",
-              HttpMethod.GET,
-              requestEntity,
-              new ParameterizedTypeReference<Map<String, ShopItem>>() {},
-              shopItemId);
+          restTemplate.exchange(SHOP_SERVICE_URL + "shopItem/{id}", HttpMethod.GET, requestEntity,
+              new ParameterizedTypeReference<Map<String, ShopItem>>() {}, shopItemId);
       return resJson;
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -90,7 +78,8 @@ public class PaymentService {
   }
 
   private void updateShopItemStock(int shopItemId, int newQuantity) {
-    String json = "{" + "\"shopItem\":" + shopItemId + ", \"newQuantity\":" + newQuantity + "}";
+    String json = "{"
+        + "\"shopItem\":" + shopItemId + ", \"newQuantity\":" + newQuantity + "}";
 
     rabbitTemplate.convertAndSend(DIR_EXCHANGE, SHOP_ROUTING_KEY, json);
   }
