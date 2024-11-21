@@ -1,0 +1,15 @@
+services:
+  rabbitmq-service:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-service
+    networks:
+      - netw
+    ports:
+    - ${RABBITMQ_AMQ_PORT}:${RABBITMQ_AMQ_PORT}
+    - ${RABBITMQ_DASHBOARD_PORT}:${RABBITMQ_DASHBOARD_PORT}
+    env_file:
+      - .env
+networks:
+  netw:
+    external: true
+    driver: bridge

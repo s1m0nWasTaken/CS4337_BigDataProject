@@ -9,4 +9,4 @@ include 'EurekaService'
 include 'RatingService'
 include 'PaymentService'
 include 'OrderService'
-
+include 'RabbitMQService'
