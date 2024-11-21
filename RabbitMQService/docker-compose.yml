@@ -9,6 +9,10 @@ services:
     - ${RABBITMQ_DASHBOARD_PORT}:${RABBITMQ_DASHBOARD_PORT}
     env_file:
       - .env
+    #register this with eurika
+    volumes:
+    - ./eurika_registration.sh:/usr/local/bin/eurika_registration.sh
+    command: rabbitmq-server && /bin/bash /usr/local/bin/eurika_registration.sh
 networks:
   netw:
     external: true
