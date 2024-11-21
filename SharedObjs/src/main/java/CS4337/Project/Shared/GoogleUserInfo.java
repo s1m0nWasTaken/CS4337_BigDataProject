@@ -1,4 +1,4 @@
-package CS4337.Project.Model;
+package CS4337.Project.Shared;
 
 import lombok.Data;
 import lombok.Getter;

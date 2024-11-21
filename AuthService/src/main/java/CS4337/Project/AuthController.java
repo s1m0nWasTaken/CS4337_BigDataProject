@@ -2,10 +2,11 @@ package CS4337.Project;
 
 import CS4337.Project.Model.GoogleTokenInfo;
 import CS4337.Project.Model.GoogleUserInfo;
-import CS4337.Project.Model.User;
+//import CS4337.Project.Model.User;
 import java.util.Map;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import CS4337.Project.Shared.User;
 
 @RestController
 public class AuthController {
