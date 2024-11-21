@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @EnableDiscoveryClient
 @SpringBootApplication
 @RestController
-
 public class ShopService {
   @RabbitListener(queues = SHOP_QUEUE)
   public void handleShopItemMessage(String message, Channel channel, Message amqpMessage) {
@@ -58,9 +57,11 @@ public class ShopService {
   }
 
   @GetMapping("/shop")
-  public ResponseEntity<Map<String, Object>> shop(@RequestParam(required = false) String shopName,
+  public ResponseEntity<Map<String, Object>> shop(
+      @RequestParam(required = false) String shopName,
       @RequestParam(required = false) String description,
-      @RequestParam(required = false) Integer id, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(required = false) Integer id,
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int pageSize) {
     int maxItemsShown = 50;
 
@@ -106,9 +107,15 @@ public class ShopService {
     try {
       String sqlInsert =
           "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
-          + "VALUES (?, ?, ?, ?, ?, ?)";
-      jdbcTemplate.update(sqlInsert, shop.getShopOwnerid(), shop.getShopName(), shop.getImageData(),
-          shop.getDescription(), shop.getShopType().name(), shop.getShopEmail());
+              + "VALUES (?, ?, ?, ?, ?, ?)";
+      jdbcTemplate.update(
+          sqlInsert,
+          shop.getShopOwnerid(),
+          shop.getShopName(),
+          shop.getImageData(),
+          shop.getDescription(),
+          shop.getShopType().name(),
+          shop.getShopEmail());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
@@ -118,8 +125,9 @@ public class ShopService {
   @GetMapping("/shopItem/{id}")
   public ResponseEntity<Map<String, Object>> shopItemById(@PathVariable("id") int id) {
     try {
-      ShopItem shopItem = jdbcTemplate.queryForObject(
-          "SELECT * FROM `ShopItem` WHERE id = ?", new ShopItemRowMapper(), id);
+      ShopItem shopItem =
+          jdbcTemplate.queryForObject(
+              "SELECT * FROM `ShopItem` WHERE id = ?", new ShopItemRowMapper(), id);
 
       return ResponseEntity.ok(Map.of("success", shopItem));
     } catch (DataAccessException e) {
@@ -132,7 +140,8 @@ public class ShopService {
       @RequestParam(required = false) String itemName,
       @RequestParam(required = false) String description,
       @RequestParam(required = false) Double minPrice,
-      @RequestParam(required = false) Double maxPrice, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(required = false) Double maxPrice,
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int pageSize) {
     // Set maxItemsShown to limit the max number of items shown
     int maxItemsShown = 50;
@@ -192,9 +201,14 @@ public class ShopService {
     try {
       String sqlInsert =
           "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
-          + "VALUES (?, ?, ?, ?, ?, ?)";
-      jdbcTemplate.update(sqlInsert, shopItem.getShopid(), shopItem.getPrice(),
-          shopItem.getItemName(), shopItem.getStock(), shopItem.getPicture(),
+              + "VALUES (?, ?, ?, ?, ?, ?)";
+      jdbcTemplate.update(
+          sqlInsert,
+          shopItem.getShopid(),
+          shopItem.getPrice(),
+          shopItem.getItemName(),
+          shopItem.getStock(),
+          shopItem.getPicture(),
           shopItem.getDescription());
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {

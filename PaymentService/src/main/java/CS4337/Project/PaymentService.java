@@ -69,8 +69,12 @@ public class PaymentService {
 
       HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
       ResponseEntity<Map<String, ShopItem>> resJson =
-          restTemplate.exchange(SHOP_SERVICE_URL + "shopItem/{id}", HttpMethod.GET, requestEntity,
-              new ParameterizedTypeReference<Map<String, ShopItem>>() {}, shopItemId);
+          restTemplate.exchange(
+              SHOP_SERVICE_URL + "shopItem/{id}",
+              HttpMethod.GET,
+              requestEntity,
+              new ParameterizedTypeReference<Map<String, ShopItem>>() {},
+              shopItemId);
       return resJson;
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -78,8 +82,7 @@ public class PaymentService {
   }
 
   private void updateShopItemStock(int shopItemId, int newQuantity) {
-    String json = "{"
-        + "\"shopItem\":" + shopItemId + ", \"newQuantity\":" + newQuantity + "}";
+    String json = "{" + "\"shopItem\":" + shopItemId + ", \"newQuantity\":" + newQuantity + "}";
 
     rabbitTemplate.convertAndSend(DIR_EXCHANGE, SHOP_ROUTING_KEY, json);
   }
