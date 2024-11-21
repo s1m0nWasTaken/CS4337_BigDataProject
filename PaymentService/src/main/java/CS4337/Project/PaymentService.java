@@ -90,11 +90,9 @@ public class PaymentService {
   }
 
   private void updateShopItemStock(int shopItemId, int newQuantity) {
-    Map json = Map.of("shopItem", shopItemId, "newQuantity", newQuantity);
+    String json = "{" + "\"shopItem\":" + shopItemId + ", \"newQuantity\":" + newQuantity + "}";
 
     rabbitTemplate.convertAndSend(DIR_EXCHANGE, SHOP_ROUTING_KEY, json);
-    // ResponseEntity<Map> response = restTemplate.exchange(
-    //     SHOP_SERVICE_URL + "shopItem/" + shopItemId, HttpMethod.PUT, requestEntity, Map.class);
   }
 }
 

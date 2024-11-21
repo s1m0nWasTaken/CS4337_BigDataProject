@@ -28,6 +28,8 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.json:json:20210307'
 }
 
 dependencyManagement {
