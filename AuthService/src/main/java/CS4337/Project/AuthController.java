@@ -1,12 +1,11 @@
 package CS4337.Project;
 
-import CS4337.Project.Model.GoogleTokenInfo;
-import CS4337.Project.Model.GoogleUserInfo;
-//import CS4337.Project.Model.User;
+import CS4337.Project.Shared.GoogleTokenInfo;
+import CS4337.Project.Shared.GoogleUserInfo;
+import CS4337.Project.Shared.User;
 import java.util.Map;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import CS4337.Project.Shared.User;
 
 @RestController
 public class AuthController {
@@ -26,7 +25,6 @@ public class AuthController {
       @RequestParam("scope") String scope,
       @RequestParam("authuser") String authUser,
       @RequestParam("prompt") String prompt) {
-
     GoogleTokenInfo tokenInfo = authService.getGoogleTokenInfoByCode(code);
     GoogleUserInfo googleUserInfo = authService.getUserInfoFromGoogle(tokenInfo.getAccessToken());
     User user = authService.getUserByEmail(googleUserInfo.getEmail());

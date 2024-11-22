@@ -39,7 +39,7 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-    implementation 'CS4337.Project:SharedObjs:1.0.0'
+    implementation 'CS4337.Project:SharedObjs:0.0.1-SNAPSHOT'
 }
 
 dependencyManagement {
