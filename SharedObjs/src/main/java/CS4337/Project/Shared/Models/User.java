@@ -1,4 +1,4 @@
-package CS4337.Project.Shared;
+package CS4337.Project.Shared.Models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

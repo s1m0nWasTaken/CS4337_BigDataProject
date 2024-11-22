@@ -1,4 +1,4 @@
-package CS4337.Project.Shared;
+package CS4337.Project.Shared.Models;
 
 public enum UserType {
   admin,
