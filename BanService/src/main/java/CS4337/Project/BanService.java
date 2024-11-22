@@ -1,5 +1,8 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.DTO.ReqBan;
+import CS4337.Project.Shared.DTO.ShopBan;
+import CS4337.Project.Shared.DTO.UserBan;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;

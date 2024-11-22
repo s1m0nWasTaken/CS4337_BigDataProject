@@ -1,4 +1,4 @@
-package CS4337.Project;
+package CS4337.Project.Shared.DTO;
 
 import java.sql.Date;
 
