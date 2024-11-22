@@ -28,4 +28,38 @@ public class User {
 
   @JsonProperty("isHidden")
   private boolean isHidden;
+
+  public User(
+      int id, UserType userType, String username, String email, String address, boolean isHidden) {
+    this.id = id;
+    this.userType = userType;
+    this.username = username;
+    this.email = email;
+    this.address = address;
+    this.isHidden = isHidden;
+  }
+
+  public User(UserType userType, String username, String email, String address) {
+    this.userType = userType;
+    this.username = username;
+    this.email = email;
+    this.address = address;
+  }
+
+  public User(
+      int id, String userType, String username, String email, String address, boolean isHidden) {
+    this.id = id;
+    this.userType = UserType.valueOf(userType);
+    this.username = username;
+    this.email = email;
+    this.address = address;
+    this.isHidden = isHidden;
+  }
+
+  public User(String userType, String username, String email, String address) {
+    this.userType = UserType.valueOf(userType);
+    this.username = username;
+    this.email = email;
+    this.address = address;
+  }
 }
