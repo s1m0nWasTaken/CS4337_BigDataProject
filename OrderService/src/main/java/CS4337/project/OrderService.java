@@ -1,7 +1,7 @@
 package CS4337.project;
 
-import CS4337.Project.Shared.DTO.Transaction;
 import CS4337.Project.Shared.DTO.TransactionRequest;
+import CS4337.Project.Shared.Models.Transaction;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
