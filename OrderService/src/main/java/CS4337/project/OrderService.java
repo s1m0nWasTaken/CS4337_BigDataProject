@@ -1,6 +1,7 @@
 package CS4337.project;
 
-import java.sql.Date;
+import CS4337.Project.Shared.DTO.Transaction;
+import CS4337.Project.Shared.DTO.TransactionRequest;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -108,53 +109,5 @@ public class OrderService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Failed to retrieve orders: " + e.getMessage()));
     }
-  }
-}
-
-class Transaction {
-  private int id;
-  private int sourceUserId;
-  private double amount;
-  private String transactionStatus;
-  private Date timeStamp;
-
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public int getSourceUserId() {
-    return sourceUserId;
-  }
-
-  public void setSourceUserId(int sourceUserId) {
-    this.sourceUserId = sourceUserId;
-  }
-
-  public Date getTimeStamp() {
-    return timeStamp;
-  }
-
-  public void setTimeStamp(Date timeStamp) {
-    this.timeStamp = timeStamp;
-  }
-
-  public double getAmount() {
-    return amount;
-  }
-
-  public void setAmount(double amount) {
-    this.amount = amount;
-  }
-
-  public String getTransactionStatus() {
-    return transactionStatus;
-  }
-
-  public void setTransactionStatus(String transactionStatus) {
-    this.transactionStatus = transactionStatus;
   }
 }
