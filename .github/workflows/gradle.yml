@@ -19,7 +19,7 @@ jobs:
     - name: Execute Gradle build
       run: |
         sudo chmod +x gradlew
-        ./gradlew build
+        ./gradlew fullBuild
 
     - name: Build the Messaging Service Docker image
       run: docker build -f ./MessagingService/Dockerfile ./MessagingService/
