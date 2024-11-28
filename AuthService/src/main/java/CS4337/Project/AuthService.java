@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,10 @@ public class AuthService {
   private String secretKey;
 
   @Autowired private RestTemplate restTemplate;
+
+  @Autowired
+  @Qualifier("googleRestTemplate") private RestTemplate googleRestTemplate;
+
   @Autowired private AuthRepository authRepository;
 
   private static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
@@ -58,7 +63,7 @@ public class AuthService {
     HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, httpHeaders);
 
     GoogleTokenInfo tokenInfo =
-        restTemplate.postForObject(TOKEN_URL, requestEntity, GoogleTokenInfo.class);
+        googleRestTemplate.postForObject(TOKEN_URL, requestEntity, GoogleTokenInfo.class);
     return tokenInfo;
   }
 
@@ -68,7 +73,7 @@ public class AuthService {
 
     HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
     ResponseEntity<GoogleUserInfo> response =
-        restTemplate.exchange(USER_INFO_URL, HttpMethod.GET, entity, GoogleUserInfo.class);
+        googleRestTemplate.exchange(USER_INFO_URL, HttpMethod.GET, entity, GoogleUserInfo.class);
 
     return response.getBody();
   }
