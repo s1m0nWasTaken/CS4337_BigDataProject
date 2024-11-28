@@ -13,6 +13,9 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @EnableDiscoveryClient
@@ -73,7 +76,14 @@ public class ShopService {
 
   @PostMapping("/shop")
   public Map<String, Object> addShop(@RequestBody Shop shop) {
-    // needs user access checking
+    if (isUserShopOwner()) {
+      shop.setShopOwnerid(
+          Integer.parseInt(
+              (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
+    } else if (!isUserAdmin()) {
+      return Map.of("error", "You do not have permission to create shops");
+    }
+
     try {
       String sqlInsert =
           "INSERT INTO Shop (shopOwnerid, shopName, imageData, description, shopType, shopEmail) "
@@ -89,6 +99,17 @@ public class ShopService {
       return Map.of("success", 1);
     } catch (TransientDataAccessResourceException e) {
       return Map.of("error", e.getMessage());
+    }
+  }
+
+  @GetMapping("/shop/{id}")
+  public ResponseEntity<?> getShop(@PathVariable int id) {
+    String sql = "SELECT * FROM `Shop` WHERE id = ?";
+    try {
+      Shop shop = jdbcTemplate.queryForObject(sql, new ShopRowMapper(), id);
+      return ResponseEntity.status(HttpStatus.OK).body(shop);
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
   }
 
@@ -168,7 +189,23 @@ public class ShopService {
 
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
-    // need to add user access checking
+    int shopOwnerId = getShopOwnerIdByShopItem(shopItem);
+    ResponseEntity<?> response = getShop(shopItem.getShopid());
+    Shop shop = (Shop) response.getBody();
+    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+      return Map.of(
+          "error",
+          "You do not have permission to add shop items",
+          "id",
+          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+          "shopOwnerId",
+          shopOwnerId,
+          "shop",
+          shop.toString(),
+          "shopOwneraIdaga",
+          shop.getShopOwnerid());
+    }
+
     try {
       String sqlInsert =
           "INSERT INTO ShopItem (shopid, price, itemName, stock, picture, description) "
@@ -189,7 +226,10 @@ public class ShopService {
 
   @PutMapping("/shopItem/{id}")
   public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
-    // need to add user access checking
+    int shopOwnerId = getShopOwnerIdByShopItemId(id);
+    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+      return Map.of("error", "You do not have permission to edit this shop");
+    }
 
     List<Object> params = new ArrayList<>();
     StringBuilder sql = new StringBuilder("UPDATE ShopItem SET ");
@@ -238,8 +278,10 @@ public class ShopService {
 
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
-    // add checking for only shopOwnerId allocated to shop allowed to update
-    // shop
+    int shopOwnerId = getShopOwnerIdFromShopId(id);
+    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+      return Map.of("error", "You do not have permission to edit this shop");
+    }
 
     List<Object> params = new ArrayList<>();
     StringBuilder sql = new StringBuilder("UPDATE Shop SET ");
@@ -293,6 +335,11 @@ public class ShopService {
 
   @DeleteMapping("/shop/{id}")
   public Map<String, Object> deleteShop(@PathVariable int id) {
+    int shopOwnerId = getShopOwnerIdFromShopId(id);
+    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+      return Map.of("error", "You do not have permission to delete this shop");
+    }
+
     String deleteQuery = "DELETE FROM Shop WHERE id = ?";
 
     try {
@@ -310,6 +357,11 @@ public class ShopService {
 
   @DeleteMapping("/shopItem/{id}")
   public Map<String, Object> deleteShopItem(@PathVariable int id) {
+    int shopOwnerId = getShopOwnerIdByShopItemId(id);
+    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+      return Map.of("error", "You do not have permission to delete this shop item");
+    }
+
     String deleteQuery = "DELETE FROM ShopItem WHERE id = ?";
 
     try {
@@ -340,5 +392,72 @@ public class ShopService {
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
+  }
+
+  private boolean isUserShopOwner() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_shopowner");
+  }
+
+  private boolean isUserOwnerOfShop(int id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    int userId = Integer.parseInt((String) authentication.getPrincipal());
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_shopowner") && userId == id;
+  }
+
+  private int getShopOwnerIdByShopItem(ShopItem shopItem) {
+    ResponseEntity<?> response = getShop(shopItem.getShopid());
+    if (response.getStatusCode() == HttpStatus.OK) {
+      Shop shop = (Shop) response.getBody();
+      if (shop != null) {
+        return shop.getShopOwnerid();
+      }
+    }
+    return -1;
+  }
+
+  private int getShopOwnerIdByShopItemId(int id) {
+    ShopItem shopItem = null;
+    ResponseEntity<?> response = shopItemById(id);
+    if (response.getStatusCode() == HttpStatus.OK) {
+      Map<String, Object> map = (Map) response.getBody();
+      shopItem = (ShopItem) map.get("success");
+    }
+    return getShopOwnerIdByShopItem(shopItem);
+  }
+
+  private int getShopOwnerIdFromShopId(int id) {
+    ResponseEntity<?> response = getShop(id);
+    if (response.getStatusCode() == HttpStatus.OK) {
+      Shop s = (Shop) response.getBody();
+      if (s != null) {
+        return s.getShopOwnerid();
+      }
+    }
+
+    return -1;
+  }
+
+  private boolean isUserAdmin() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_admin");
   }
 }
