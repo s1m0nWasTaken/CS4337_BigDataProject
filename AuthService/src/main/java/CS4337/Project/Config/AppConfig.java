@@ -21,4 +21,10 @@ public class AppConfig {
     restTemplate.setInterceptors(List.of(new ApiKeyInterceptor()));
     return restTemplate;
   }
+
+  @Bean("authRestTemplate")
+  @LoadBalanced
+  public RestTemplate getAuthRestTemplate() {
+    return new RestTemplate();
+  }
 }

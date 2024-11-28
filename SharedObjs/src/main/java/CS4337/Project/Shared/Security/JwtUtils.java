@@ -13,11 +13,11 @@ public class JwtUtils {
   String secretKey;
 
   public boolean validateToken(String token, String username) {
-    final String extractedUsername = extractUsername(token);
+    final String extractedUsername = extractUserId(token);
     return (extractedUsername.equals(username) && !isTokenExpired(token));
   }
 
-  public String extractUsername(String token) {
+  public String extractUserId(String token) {
     return extractAllClaims(token).getSubject();
   }
 

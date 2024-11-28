@@ -161,7 +161,7 @@ public class AuthService {
 
   public String generateJWT(User user) {
     return Jwts.builder()
-        .setSubject(user.getEmail())
+        .setSubject(String.valueOf(user.getId()))
         .claim("role", user.getUserType().name())
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRY))
