@@ -35,7 +35,8 @@ public class AuthService {
   @Value("${secret-key}")
   private String secretKey;
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  @Qualifier("msRestTemplate") private RestTemplate restTemplate;
 
   @Autowired
   @Qualifier("googleRestTemplate") private RestTemplate googleRestTemplate;
@@ -106,11 +107,12 @@ public class AuthService {
     HttpEntity<User> requestEntity = new HttpEntity<>(user, httpHeaders);
 
     String response = restTemplate.postForObject(postUserUrl, requestEntity, String.class);
-    user = getUserByEmail(user.getEmail());
 
     if (!response.contains("success") || user == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User registration failed");
     }
+
+    user = getUserByEmail(user.getEmail());
 
     String jwt = generateJWT(user);
     RefreshToken refreshToken = generateRefreshToken(user);
