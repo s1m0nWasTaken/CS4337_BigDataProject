@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.DTO.TransactionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,35 +28,5 @@ public class PaymentController {
           .body("PaymentService not available");
     }
     return paymentService.getTransactionStatus(transactionId);
-  }
-}
-
-class TransactionRequest {
-  private int userId;
-  private int shopItemId;
-  private int quantity;
-
-  public int getUserId() {
-    return userId;
-  }
-
-  public void setUserId(int userId) {
-    this.userId = userId;
-  }
-
-  public int getShopItemId() {
-    return shopItemId;
-  }
-
-  public void setShopItemId(int shopItemId) {
-    this.shopItemId = shopItemId;
-  }
-
-  public int getQuantity() {
-    return quantity;
-  }
-
-  public void setQuantity(int quantity) {
-    this.quantity = quantity;
   }
 }

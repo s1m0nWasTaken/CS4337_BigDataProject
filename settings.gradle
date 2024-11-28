@@ -3,11 +3,12 @@ include 'UserService'
 include 'MessagingService'
 include 'BanService'
 include 'ShopService'
-include 'ConfigService'
+//include 'ConfigService' removed
 include 'AuthService'
 include 'EurekaService'
 include 'RatingService'
 include 'PaymentService'
 include 'OrderService'
+include 'SharedObjs'
 include 'ApiGatewayService'
 

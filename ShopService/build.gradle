@@ -16,6 +16,9 @@ java {
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri('../SharedObjs/build/publishing-repository')
+    }
 }
 
 dependencies {
@@ -28,6 +31,7 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'CS4337.Project:SharedObjs:0.0.1-SNAPSHOT'
 }
 
 dependencyManagement {

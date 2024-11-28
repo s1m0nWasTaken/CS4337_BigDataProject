@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Models.ShopItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

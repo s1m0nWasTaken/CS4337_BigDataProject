@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import CS4337.Project.Shared.Models.ShopItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ShopService.class)
 public class ShopServiceTest {
-
   @Autowired private MockMvc mockMvc;
 
   @MockBean private ShopService shopService;

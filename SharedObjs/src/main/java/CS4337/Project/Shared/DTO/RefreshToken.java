@@ -1,4 +1,4 @@
-package CS4337.Project.Model;
+package CS4337.Project.Shared.DTO;
 
 import java.sql.Timestamp;
 import lombok.Data;

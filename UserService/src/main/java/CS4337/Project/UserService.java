@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Models.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class UserService {
           user.getUsername(),
           user.getEmail(),
           user.getAddress(),
-          user.getIsHidden());
+          user.isHidden());
       return ResponseEntity.ok(Map.of("success", 1));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));

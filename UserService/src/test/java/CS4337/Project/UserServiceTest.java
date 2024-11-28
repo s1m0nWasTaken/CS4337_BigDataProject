@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+import CS4337.Project.Shared.Models.User;
+import CS4337.Project.Shared.Models.UserType;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

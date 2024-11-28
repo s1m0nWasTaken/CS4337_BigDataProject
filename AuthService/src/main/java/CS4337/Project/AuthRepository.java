@@ -1,6 +1,6 @@
 package CS4337.Project;
 
-import CS4337.Project.Model.RefreshToken;
+import CS4337.Project.Shared.DTO.RefreshToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
