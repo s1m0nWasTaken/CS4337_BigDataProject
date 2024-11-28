@@ -12,6 +12,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,11 +35,9 @@ public class UserService {
     SpringApplication.run(UserService.class, args);
   }
 
-  @GetMapping("/users") // pass an ishidden feild in json body to choose
+  @GetMapping("/users") // pass an isHidden field in json body to choose
   public ResponseEntity<Map<String, Object>> users(
       @RequestParam(required = false) Boolean isHidden) {
-    // TODO: later add a check with auth if admin and if so allow to show hidden
-    // and normal else only normal
     try {
       if (isHidden != null) {
         boolean hidden = isHidden;
@@ -77,6 +78,11 @@ public class UserService {
 
   @GetMapping("/user/{id}")
   public ResponseEntity<Map<String, Object>> getUser(@PathVariable("id") int id) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permissions"));
+    }
+
     try {
       User user =
           jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?", new UserRowMapper(), id);
@@ -102,6 +108,11 @@ public class UserService {
 
   @DeleteMapping("/user/{id}")
   public ResponseEntity<Map<String, String>> deleteUser(@PathVariable("id") int id) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to delete this user"));
+    }
+
     try {
       jdbcTemplate.update("DELETE FROM User WHERE id = ?", id);
 
@@ -114,6 +125,11 @@ public class UserService {
   @PutMapping("user/{id}")
   public ResponseEntity<Map<String, Object>> updateUser(
       @PathVariable("id") int id, @RequestBody User userUpdates) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to update this user"));
+    }
+
     try {
       List<Object> params = new ArrayList<>();
       StringBuilder updateStatement = new StringBuilder("UPDATE User SET ");
@@ -162,5 +178,20 @@ public class UserService {
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
+  }
+
+  private boolean isUserAuthorized(int id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    int userId = Integer.parseInt((String) authentication.getPrincipal());
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    if (!role.equalsIgnoreCase("admin") && userId != id) {
+      return false;
+    }
+    return true;
   }
 }

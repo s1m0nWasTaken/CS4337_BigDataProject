@@ -22,6 +22,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             request -> {
+              request.requestMatchers("/users").hasRole("admin");
+              request.requestMatchers("/user/ban/*").hasRole("admin");
               request.anyRequest().authenticated();
             })
         .csrf(AbstractHttpConfigurer::disable)
