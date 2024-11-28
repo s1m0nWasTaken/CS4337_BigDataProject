@@ -6,5 +6,8 @@ include 'ShopService'
 include 'ConfigService'
 include 'AuthService'
 include 'EurekaService'
+include 'RatingService'
+include 'PaymentService'
+include 'OrderService'
 include 'ApiGatewayService'
 

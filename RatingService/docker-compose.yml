@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: ratingDB
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: rating_service
+    networks:
+      - netw
+    ports:
+      - "${RATE_MYSQL_SERVER_PORT}:${RATE_MYSQL_CONTAINER_PORT}"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
+  rating-service:
+    image: ratingsvc
+    container_name: rating-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    networks:
+      - netw
+    ports:
+      - "${RATE_SERVER_PORT}:${RATE_CONTAINER_PORT}"
+    env_file:
+      - .env
+
+networks:
+  netw:
+    external: true
+    driver: bridge

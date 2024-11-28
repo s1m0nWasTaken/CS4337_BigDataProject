@@ -24,4 +24,5 @@ services:
       - .env
 networks:
   netw:
+    external: true
     driver: bridge
