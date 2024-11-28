@@ -10,5 +10,3 @@ include 'RatingService'
 include 'PaymentService'
 include 'OrderService'
 include 'SharedObjs'
-include 'ApiGatewayService'
-
