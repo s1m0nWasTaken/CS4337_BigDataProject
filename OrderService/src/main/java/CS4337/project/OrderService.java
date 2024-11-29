@@ -6,11 +6,15 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,7 +25,8 @@ public class OrderService {
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  @Qualifier("msRestTemplate") private RestTemplate restTemplate;
 
   private final String PAYMENT_SERVICE_URL = "http://PAYMENTSERVICE";
 
@@ -31,6 +36,11 @@ public class OrderService {
 
   @PostMapping("/order")
   public ResponseEntity<?> addOrder(@RequestBody Order order) {
+    if (!isUserAdmin() && getUserId() != order.getUserId()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body("You do not have permission to create this order");
+    }
+
     try {
       // Validate payment before making order
       TransactionRequest transactionRequest = new TransactionRequest();
@@ -80,6 +90,17 @@ public class OrderService {
   public ResponseEntity<Map<String, Object>> updateOrderStatus(
       @PathVariable int orderId, @RequestParam String status) {
     try {
+      ResponseEntity<?> response = getOrder(orderId);
+      if (response.getStatusCode() != HttpStatus.OK) {
+        Map<String, Object> orderData = (Map<String, Object>) response.getBody();
+        Order order = (Order) orderData.get("success");
+
+        if (!isUserAdmin() && getUserId() != order.getUserId()) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(Map.of("error", "You do not have permission to update this order"));
+        }
+      }
+
       String sqlUpdate = "UPDATE Orders SET orderStatus = ? WHERE id = ?";
       int rowsAffected = jdbcTemplate.update(sqlUpdate, status, orderId);
 
@@ -109,5 +130,45 @@ public class OrderService {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Failed to retrieve orders: " + e.getMessage()));
     }
+  }
+
+  @GetMapping("/order/{orderId}")
+  public ResponseEntity<?> getOrder(@PathVariable int orderId) {
+    try {
+      String sql = "SELECT * FROM Orders WHERE id = ?";
+      Order order = jdbcTemplate.queryForObject(sql, new OrderMapper(), orderId);
+
+      if (order == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
+      }
+
+      if (!isUserAdmin() && getUserId() != order.getUserId()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("You do not have permission to view this order");
+      }
+
+      return ResponseEntity.status(HttpStatus.OK).body(order);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(
+              Map.of(
+                  "error", "Failed to retrieve order with id " + orderId + ": " + e.getMessage()));
+    }
+  }
+
+  private int getUserId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return Integer.parseInt((String) authentication.getPrincipal());
+  }
+
+  public boolean isUserAdmin() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_admin");
   }
 }
