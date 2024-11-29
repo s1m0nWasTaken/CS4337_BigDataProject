@@ -16,7 +16,3 @@ tasks.named('test') {
 tasks.register('makeSharedObjs') {
     dependsOn ':SharedObjs:build', ':SharedObjs:publish'
 }
-
-tasks.register('fullBuild') {
-    dependsOn 'clean', ':SharedObjs:build', ':SharedObjs:publish', 'build'
-}
