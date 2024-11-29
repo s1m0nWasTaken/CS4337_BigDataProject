@@ -6,24 +6,26 @@ import CS4337.Project.Shared.Models.Transaction;
 import java.util.Date;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class PaymentService {
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  @Qualifier("msRestTemplate") private RestTemplate restTemplate;
 
   @Autowired private TransactionRepository transactionRepository;
 
   private final String SHOP_SERVICE_URL = "http://SHOPSERVICE/";
-  private final String USER_SERVICE_URL = "http://USERSERVICE/";
 
-  // dont need user checking here bc auth wouldalready have done that
   public ResponseEntity<?> createTransaction(TransactionRequest request) {
-
     ResponseEntity<Map<String, ShopItem>> shopItemResponse =
         getShopItemById(request.getShopItemId());
     if (shopItemResponse.getStatusCode() != HttpStatus.OK) {
@@ -53,13 +55,24 @@ public class PaymentService {
     return ResponseEntity.ok(transaction);
   }
 
-  public ResponseEntity<?> getTransactionStatus(int transactionId) {
-    Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
-    if (transaction == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
-    }
+  public Transaction getTransaction(int transactionId) {
+    return transactionRepository.findById(transactionId).orElse(null);
+  }
 
-    return ResponseEntity.ok(transaction);
+  public boolean isUserAdmin() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_admin");
+  }
+
+  public int getUserId() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    return Integer.parseInt((String) auth.getPrincipal());
   }
 
   private ResponseEntity<Map<String, ShopItem>> getShopItemById(int shopItemId) {

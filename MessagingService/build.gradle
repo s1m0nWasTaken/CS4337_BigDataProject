@@ -17,6 +17,9 @@ java {
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri('../SharedObjs/build/publishing-repository')
+    }
 }
 
 tasks.withType(JavaCompile) {
@@ -37,6 +40,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'CS4337.Project:SharedObjs:0.0.1-SNAPSHOT'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
  jacoco {

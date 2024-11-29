@@ -182,16 +182,21 @@ public class UserService {
 
   private boolean isUserAuthorized(int id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    int userId = Integer.parseInt((String) authentication.getPrincipal());
     String role =
         authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .findFirst()
             .orElse(null);
 
-    if (!role.equalsIgnoreCase("admin") && userId != id) {
-      return false;
+    if (role.equalsIgnoreCase("ROLE_admin")) {
+      return true;
     }
-    return true;
+
+    int userId = Integer.parseInt((String) authentication.getPrincipal());
+
+    if (userId == id) {
+      return true;
+    }
+    return false;
   }
 }

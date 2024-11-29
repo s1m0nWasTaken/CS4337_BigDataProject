@@ -42,6 +42,11 @@ public class MessageRepository {
     return jdbcTemplate.update(query, chatid);
   }
 
+  public int getSenderIdByMessageId(int id) {
+    String query = "SELECT senderid FROM Messages WHERE id = ?";
+    return jdbcTemplate.queryForObject(query, Integer.class, id);
+  }
+
   private RowMapper<Message> messageMapper =
       (rs, rowNum) ->
           new Message(
