@@ -1,6 +1,7 @@
 package CS4337.Project;
 
-import CS4337.Project.Model.*;
+import CS4337.Project.Shared.DTO.*;
+import CS4337.Project.Shared.Models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

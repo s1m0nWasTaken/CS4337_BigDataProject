@@ -1,6 +1,6 @@
-package CS4337.project;
+package CS4337.Project.Shared.DTO;
 
-class TransactionRequest {
+public class TransactionRequest {
   private int userId;
   private int shopItemId;
   private int quantity;

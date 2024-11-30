@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Models.ShopItem;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;

@@ -19,6 +19,8 @@ jobs:
     - name: Execute Gradle build
       run: |
         sudo chmod +x gradlew
+        ./gradlew clean
+        ./gradlew makeSharedObjs
         ./gradlew build
 
     - name: Build the Messaging Service Docker image
@@ -38,3 +40,12 @@ jobs:
 
     - name: Build the Eureka Service Docker image
       run: docker build -f ./EurekaService/Dockerfile ./EurekaService/
+
+    - name: Build the Order Service Docker image
+      run: docker build -f ./OrderService/Dockerfile ./OrderService/
+
+    - name: Build the Payment Service Docker image
+      run: docker build -f ./PaymentService/Dockerfile ./PaymentService/
+
+    - name: Build the Rating Service Docker image
+      run: docker build -f ./RatingService/Dockerfile ./RatingService/

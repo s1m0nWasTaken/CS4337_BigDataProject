@@ -1,4 +1,4 @@
-package CS4337.Project;
+package CS4337.Project.Shared.Models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
