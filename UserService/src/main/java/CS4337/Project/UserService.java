@@ -180,7 +180,7 @@ public class UserService {
     }
   }
 
-  private boolean isUserAuthorized(int id) {
+  protected boolean isUserAuthorized(int id) { // change to protected to let test mock true return
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
         authentication.getAuthorities().stream()
