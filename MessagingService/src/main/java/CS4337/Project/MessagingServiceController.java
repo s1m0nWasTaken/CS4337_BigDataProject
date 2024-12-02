@@ -106,21 +106,21 @@ public class MessagingServiceController {
   @PostMapping("/Messages")
   public ResponseEntity<Map<String, Object>> sendMessage(
       @RequestBody Map<String, Object> messageDetails) {
+    Integer chatid = (Integer) messageDetails.get("chatid");
+    Integer senderid = (Integer) messageDetails.get("senderid");
+    String content = (String) messageDetails.get("content");
+
+    if (chatid == null || senderid == null || content == null) {
+      return ResponseEntity.badRequest()
+              .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
+    }
+
     if (getUserId() != (int) messageDetails.get("senderid")) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to send messages"));
     }
 
     try {
-      Integer chatid = (Integer) messageDetails.get("chatid");
-      Integer senderid = (Integer) messageDetails.get("senderid");
-      String content = (String) messageDetails.get("content");
-
-      if (chatid == null || senderid == null || content == null) {
-        return ResponseEntity.badRequest()
-            .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
-      }
-
       int result = messageRepository.addMessage(chatid, senderid, content);
       return ResponseEntity.ok(
           Map.of("success", "Message sent successfully", "message_id", result));
@@ -176,12 +176,12 @@ public class MessagingServiceController {
     }
   }
 
-  private int getUserId() {
+  protected int getUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     return Integer.parseInt((String) authentication.getPrincipal());
   }
 
-  private boolean isUserAdmin() {
+  protected boolean isUserAdmin() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
         authentication.getAuthorities().stream()
