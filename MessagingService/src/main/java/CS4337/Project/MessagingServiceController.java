@@ -112,7 +112,7 @@ public class MessagingServiceController {
 
     if (chatid == null || senderid == null || content == null) {
       return ResponseEntity.badRequest()
-              .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
+          .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
     }
 
     if (getUserId() != (int) messageDetails.get("senderid")) {

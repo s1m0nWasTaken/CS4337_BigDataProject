@@ -190,20 +190,8 @@ public class ShopService {
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
     int shopOwnerId = getShopOwnerIdByShopItem(shopItem);
-    ResponseEntity<?> response = getShop(shopItem.getShopid());
-    Shop shop = (Shop) response.getBody();
     if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
-      return Map.of(
-          "error",
-          "You do not have permission to add shop items",
-          "id",
-          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
-          "shopOwnerId",
-          shopOwnerId,
-          "shop",
-          shop.toString(),
-          "shopOwneraIdaga",
-          shop.getShopOwnerid());
+      return Map.of("error", "You do not have permission to add shop items");
     }
 
     try {
@@ -394,7 +382,7 @@ public class ShopService {
     }
   }
 
-  private boolean isUserShopOwner() {
+  protected boolean isUserShopOwner() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
         authentication.getAuthorities().stream()
@@ -405,7 +393,7 @@ public class ShopService {
     return role.equalsIgnoreCase("ROLE_shopowner");
   }
 
-  private boolean isUserOwnerOfShop(int id) {
+  protected boolean isUserOwnerOfShop(int id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     int userId = Integer.parseInt((String) authentication.getPrincipal());
     String role =
@@ -417,7 +405,7 @@ public class ShopService {
     return role.equalsIgnoreCase("ROLE_shopowner") && userId == id;
   }
 
-  private int getShopOwnerIdByShopItem(ShopItem shopItem) {
+  protected int getShopOwnerIdByShopItem(ShopItem shopItem) {
     ResponseEntity<?> response = getShop(shopItem.getShopid());
     if (response.getStatusCode() == HttpStatus.OK) {
       Shop shop = (Shop) response.getBody();
@@ -428,7 +416,7 @@ public class ShopService {
     return -1;
   }
 
-  private int getShopOwnerIdByShopItemId(int id) {
+  protected int getShopOwnerIdByShopItemId(int id) {
     ShopItem shopItem = null;
     ResponseEntity<?> response = shopItemById(id);
     if (response.getStatusCode() == HttpStatus.OK) {
@@ -438,7 +426,7 @@ public class ShopService {
     return getShopOwnerIdByShopItem(shopItem);
   }
 
-  private int getShopOwnerIdFromShopId(int id) {
+  protected int getShopOwnerIdFromShopId(int id) {
     ResponseEntity<?> response = getShop(id);
     if (response.getStatusCode() == HttpStatus.OK) {
       Shop s = (Shop) response.getBody();
@@ -450,7 +438,7 @@ public class ShopService {
     return -1;
   }
 
-  private boolean isUserAdmin() {
+  protected boolean isUserAdmin() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
         authentication.getAuthorities().stream()
