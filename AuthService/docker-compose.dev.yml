@@ -21,8 +21,9 @@ services:
       - netw
     ports:
       - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
-      - "ENV=DEV"
       - .env
     depends_on:
       - mysql

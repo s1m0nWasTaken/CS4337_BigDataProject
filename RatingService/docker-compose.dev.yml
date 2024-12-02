@@ -24,6 +24,8 @@ services:
       - netw
     ports:
       - "${RATE_SERVER_PORT}:${RATE_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
 

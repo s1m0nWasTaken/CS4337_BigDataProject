@@ -8,8 +8,9 @@ services:
       - netw
     ports:
       - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
     env_file:
-      - "ENV=PROD"
       - .env
 
 networks:

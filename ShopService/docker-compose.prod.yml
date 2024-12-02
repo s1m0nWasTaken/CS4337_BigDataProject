@@ -11,8 +11,9 @@ services:
       - netw
     ports:
       - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
     env_file:
-      - "ENV=PROD"
       - .env
 
 networks:

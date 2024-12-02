@@ -2,7 +2,7 @@ import os
 import shutil
 import argparse
 
-def copy_env_file_to_services(src_file, root_dir):
+def copy_env_file_to_services(src_file, root_dir, env_value):
     if not os.path.isfile(src_file):
         print(f"Source file {src_file} does not exist.")
         return
@@ -13,6 +13,8 @@ def copy_env_file_to_services(src_file, root_dir):
 
             try:
                 shutil.copy(src_file, dest_file)
+                with open(dest_file, 'a') as file:
+                    file.write(f"\nENV={env_value}\n")
                 print(f"Copied .env to: {subdir}")
             except Exception as e:
                 print(f"Error copying .env to {subdir}: {e}")
@@ -20,5 +22,9 @@ def copy_env_file_to_services(src_file, root_dir):
 if __name__ == '__main__':
     src_env_file = './.env'
     root_directory = '.'
+    
+    parser = argparse.ArgumentParser(description="Copy .env file to services and append ENV variable.")
+    parser.add_argument("--env", type=str, help="Value for the ENV variable", required=True)
+    args = parser.parse_args()
 
-    copy_env_file_to_services(src_env_file, root_directory)
+    copy_env_file_to_services(src_env_file, root_directory, args.env)

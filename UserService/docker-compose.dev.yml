@@ -24,8 +24,9 @@ services:
       - netw
     ports:
       - "${USER_SERVER_PORT}:${USER_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
-      - "ENV=DEV"
       - .env
 
 networks:

@@ -21,8 +21,9 @@ services:
       - netw
     ports:
       - "${ORDER_SERVER_PORT}:${ORDER_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
-      - "ENV=DEV"
       - .env
 
 networks:

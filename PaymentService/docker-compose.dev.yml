@@ -24,8 +24,9 @@ services:
       - netw
     ports:
       - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
-      - "ENV=DEV"
       - .env
 
 networks:

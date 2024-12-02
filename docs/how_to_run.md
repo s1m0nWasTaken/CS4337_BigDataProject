@@ -14,3 +14,9 @@ use the new ```./gradlew fullBuild``` in place of clean build due to ShareObjs n
 Start the eurika server with docker compose
 
 Start other services as needed with docker compose
+
+
+python env.py --env dev|prod
+cd service
+docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.prod.yml up --build
