@@ -1,0 +1,17 @@
+services:
+  auth-service:
+    build:
+      dockerfile: Dockerfile
+    image: authservice
+    container_name: auth-service
+    networks:
+      - netw
+    ports:
+      - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
+    env_file:
+      - "ENV=PROD"
+      - .env
+
+networks:
+  netw:
+    driver: bridge

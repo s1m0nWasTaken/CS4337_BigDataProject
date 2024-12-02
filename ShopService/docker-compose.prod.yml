@@ -1,0 +1,20 @@
+services:
+  shop-service:
+    image: shopservice
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    container_name: shop-service
+    networks:
+      - netw
+    ports:
+      - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
+    env_file:
+      - "ENV=PROD"
+      - .env
+
+networks:
+  netw:
+    driver: bridge

@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     container_name: messagingDB
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
       MYSQL_DATABASE: messaging_service
     networks:
       - netw
@@ -25,7 +25,9 @@ services:
     ports:
       - "${MSG_SERVER_PORT}:${MSG_CONTAINER_PORT}"
     env_file:
+      - "ENV=DEV"
       - .env
+
 networks:
   netw:
     external: true

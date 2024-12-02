@@ -1,0 +1,18 @@
+services:
+  rating-service:
+    image: ratingsvc
+    container_name: rating-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - netw
+    ports:
+      - "${RATE_SERVER_PORT}:${RATE_CONTAINER_PORT}"
+    env_file:
+      - "ENV=PROD"
+      - .env
+
+networks:
+  netw:
+    driver: bridge

@@ -1,0 +1,18 @@
+services:
+  payment-service:
+    image: paymentservice:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-service
+    networks:
+      - netw
+    ports:
+      - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+    env_file:
+      - "ENV=PROD"
+      - .env
+
+networks:
+  netw:
+    driver: bridge

@@ -1,0 +1,17 @@
+services:
+  order-service:
+    image: orderservice
+    depends_on:
+      - mysql
+    container_name: order-service
+    networks:
+      - netw
+    ports:
+      - "${ORDER_SERVER_PORT}:${ORDER_CONTAINER_PORT}"
+    env_file:
+      - "ENV=PROD"
+      - .env
+
+networks:
+  netw:
+    driver: bridge
