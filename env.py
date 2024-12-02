@@ -26,5 +26,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Copy .env file to services and append ENV variable.")
     parser.add_argument("--env", type=str, help="Value for the ENV variable", required=True)
     args = parser.parse_args()
+    
+    if args.env != "dev" and args.env != "prod":
+        print(f"Please only use 'dev' or 'prod', not '{args.env}'")
+        exit(-1)
 
     copy_env_file_to_services(src_env_file, root_directory, args.env)
