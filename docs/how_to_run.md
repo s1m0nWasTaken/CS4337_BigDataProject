@@ -12,11 +12,13 @@ cd service
 docker-compose -f docker-compose.dev.yml up --build
 
 # Production
-python env.py --env prod
+git clone https://github.com/s1m0nWasTaken/CS4337_BigDataProject.git
+cd CS4337_BigDataProject
+python3 env.py --env prod
 ./gradlew makeSharedObjs
-./gradlew service:build
-cd service
-docker-compose -f docker-compose.prod.yml up --build
+./gradlew ${service}:build
+cd ${service}
+sudo docker compose -f docker-compose.prod.yml up --build
 
 
 
