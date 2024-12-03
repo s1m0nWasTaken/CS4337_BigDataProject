@@ -2,6 +2,7 @@ package CS4337.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -9,10 +10,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class MessagingServiceTest {
+  private static final int SENDER_ID = 1;
 
   @Mock private ChatParticipantRepository chatParticipantRepository;
 
@@ -27,11 +31,19 @@ public class MessagingServiceTest {
 
   @InjectMocks private MessagingServiceController messagingService;
 
+  @BeforeEach
+  public void setUp() {
+    MessagingServiceController spyMessagingService = Mockito.spy(messagingService);
+    lenient().doReturn(true).when(spyMessagingService).isUserAdmin();
+    lenient().doReturn(SENDER_ID).when(spyMessagingService).getUserId();
+    messagingService = spyMessagingService;
+  }
+
   @Test
   public void testSendMessageSuccess() {
     Map<String, Object> messageDetails = new HashMap<>();
     messageDetails.put("chatid", 1);
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     when(messageRepository.addMessage(1, 1, "Hello!")).thenReturn(1);
@@ -46,7 +58,7 @@ public class MessagingServiceTest {
   @Test
   public void testSendMessageMissingChatId() {
     Map<String, Object> messageDetails = new HashMap<>();
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);
@@ -142,7 +154,7 @@ public class MessagingServiceTest {
 
     Map<String, Object> messageDetails = new HashMap<>();
     messageDetails.put("chatid", null);
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);

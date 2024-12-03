@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -34,7 +35,9 @@ import org.springframework.web.client.RestTemplate;
 public class BanService {
   private String userServiceUrl = "http://USERSERVICE/user/ban/{id}";
   private String shopServiceUrl = "http://SHOPSERVICE/shopItem/ban/{id}";
-  @Autowired private final RestTemplate restTemplate = new RestTemplate();
+
+  @Autowired
+  @Qualifier("msRestTemplate") private final RestTemplate restTemplate = new RestTemplate();
 
   @Autowired private JdbcTemplate jdbcTemplate;
 

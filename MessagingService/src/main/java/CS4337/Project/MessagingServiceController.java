@@ -7,6 +7,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -49,6 +52,11 @@ public class MessagingServiceController {
         return ResponseEntity.badRequest().body(Map.of("error", "User IDs cannot be null."));
       }
 
+      if (!(getUserId() == userid1 || getUserId() == userid2)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(Map.of("error", "You do not have permission to create this chat"));
+      }
+
       int result = chatParticipantRepository.addChatParticipant(userid1, userid2);
       return ResponseEntity.ok(Map.of("success", result));
 
@@ -63,8 +71,12 @@ public class MessagingServiceController {
 
   @DeleteMapping("/ChatParticipants/{chatid}")
   public ResponseEntity<Map<String, Object>> removeChat(@PathVariable("chatid") int chatid) {
-    try {
+    if (!isUserAdmin()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to delete this chat"));
+    }
 
+    try {
       int rowsAffected = chatParticipantRepository.delChatParticipant(chatid);
       if (rowsAffected > 0) {
         return ResponseEntity.ok(
@@ -94,16 +106,21 @@ public class MessagingServiceController {
   @PostMapping("/Messages")
   public ResponseEntity<Map<String, Object>> sendMessage(
       @RequestBody Map<String, Object> messageDetails) {
+    Integer chatid = (Integer) messageDetails.get("chatid");
+    Integer senderid = (Integer) messageDetails.get("senderid");
+    String content = (String) messageDetails.get("content");
+
+    if (chatid == null || senderid == null || content == null) {
+      return ResponseEntity.badRequest()
+          .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
+    }
+
+    if (getUserId() != (int) messageDetails.get("senderid")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to send messages"));
+    }
+
     try {
-      Integer chatid = (Integer) messageDetails.get("chatid");
-      Integer senderid = (Integer) messageDetails.get("senderid");
-      String content = (String) messageDetails.get("content");
-
-      if (chatid == null || senderid == null || content == null) {
-        return ResponseEntity.badRequest()
-            .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
-      }
-
       int result = messageRepository.addMessage(chatid, senderid, content);
       return ResponseEntity.ok(
           Map.of("success", "Message sent successfully", "message_id", result));
@@ -116,6 +133,11 @@ public class MessagingServiceController {
 
   @DeleteMapping("/Messages/{chatid}")
   public ResponseEntity<Map<String, Object>> removeMessage(@PathVariable int chatid) {
+    if (!isUserAdmin()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to delete this chat's messages"));
+    }
+
     try {
       int result = messageRepository.delMessage(chatid);
       if (result > 0) {
@@ -134,6 +156,11 @@ public class MessagingServiceController {
   @PatchMapping("/Messages/{id}")
   public ResponseEntity<Map<String, Object>> editMessage(
       @PathVariable int id, @RequestParam String content) {
+    if (!(messageRepository.getSenderIdByMessageId(id) == getUserId())) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to edit this message"));
+    }
+
     try {
       int result = messageRepository.editMessage(id, content);
       if (result > 0) {
@@ -147,5 +174,21 @@ public class MessagingServiceController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Database error: " + e.getMessage()));
     }
+  }
+
+  protected int getUserId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return Integer.parseInt((String) authentication.getPrincipal());
+  }
+
+  protected boolean isUserAdmin() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String role =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+    return role.equalsIgnoreCase("ROLE_admin");
   }
 }

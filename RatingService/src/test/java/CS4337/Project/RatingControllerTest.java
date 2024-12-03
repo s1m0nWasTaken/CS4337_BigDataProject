@@ -4,24 +4,43 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import CS4337.Project.Shared.Security.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 @WebMvcTest(RatingController.class)
+@Import(TestSecurityConfig.class)
 public class RatingControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
   @MockBean private RatingRepository ratingRepository;
 
+  @MockBean private RatingService ratingService;
+
+  @MockBean private JwtUtils jwtUtils;
+
+  @MockBean
+  @Qualifier("authRestTemplate") private RestTemplate restTemplate;
+
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @BeforeEach
+  void setUp() {
+    lenient().doReturn(true).when(ratingService).isUserAdmin();
+    lenient().doReturn(true).when(ratingService).isUserRatingOwner(anyInt());
+  }
 
   @Test
   public void testAddRating() throws Exception {

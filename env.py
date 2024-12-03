@@ -7,7 +7,7 @@ def copy_env_file_to_services(src_file, root_dir):
         return
 
     for subdir, dirs, files in os.walk(root_dir):
-        if subdir.endswith('Service'):
+        if subdir.endswith('Service') or subdir.endswith('Objs'):
             dest_file = os.path.join(subdir, '.env')
 
             try:

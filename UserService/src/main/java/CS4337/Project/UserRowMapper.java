@@ -16,7 +16,7 @@ public class UserRowMapper implements RowMapper<User> {
     user.setUsername(rs.getString("username"));
     user.setEmail(rs.getString("email"));
     user.setAddress(rs.getString("address"));
-    user.setHidden(rs.getBoolean("hidden"));
+    user.setHidden(rs.getBoolean("isHidden"));
     return user;
   }
 }

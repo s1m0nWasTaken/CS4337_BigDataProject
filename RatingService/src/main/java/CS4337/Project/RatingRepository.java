@@ -41,6 +41,11 @@ public class RatingRepository {
     return jdbcTemplate.update(sql, id);
   }
 
+  public int getUserIdByRatingId(int id) {
+    String sql = "SELECT userid FROM ShopRating WHERE id=?";
+    return jdbcTemplate.queryForObject(sql, new Object[] {id}, Integer.class);
+  }
+
   private Rating mapRowToRating(ResultSet rs, int rowNum) throws SQLException {
     Rating rating = new Rating();
     rating.setId(rs.getInt("id"));

@@ -2,7 +2,7 @@ package CS4337.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import CS4337.Project.Shared.Models.User;
 import CS4337.Project.Shared.Models.UserType;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,10 @@ public class UserServiceTest {
   @BeforeEach
   public void setup() {
     testUser = new User(UserType.customer, "johndoe", "john@example.com", "123 Main St");
+    // lenient so it will still make the stub even though it isnt used in every test
+    UserService spyUserService = Mockito.spy(userService);
+    lenient().doReturn(true).when(spyUserService).isUserAuthorized(anyInt());
+    userService = spyUserService;
   }
 
   @Test
