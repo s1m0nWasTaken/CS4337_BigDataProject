@@ -4,28 +4,28 @@ import argparse
 
 def write_system_variables(file):
     system_var = os.environ.get("PROD_USER_NAME")
-    file.write(f"\PROD_USER_NAME={system_var}\n")
+    file.write(f"\nPROD_USER_NAME={system_var}\n")
     
     system_var = os.environ.get("PROD_USER_PSWD")
-    file.write(f"\PROD_USER_PSWD={system_var}\n")
+    file.write(f"\nPROD_USER_PSWD={system_var}\n")
     
     system_var = os.environ.get("SECRET_KEY")
-    file.write(f"\SECRET_KEY={system_var}\n")
+    file.write(f"\nSECRET_KEY={system_var}\n")
     
     system_var = os.environ.get("EURIKA_IP")
-    file.write(f"\EURIKA_IP={system_var}\n")
+    file.write(f"\nEURIKA_IP={system_var}\n")
     
     system_var = os.environ.get("API_KEY")
-    file.write(f"\API_KEY={system_var}\n")
+    file.write(f"\nAPI_KEY={system_var}\n")
     
     system_var = os.environ.get("GOOGLE_CLIENT_SECRET")
-    file.write(f"\GOOGLE_CLIENT_SECRET={system_var}\n")
+    file.write(f"\nGOOGLE_CLIENT_SECRET={system_var}\n")
     
     db_url_vars = {key: value for key, value in os.environ.items() if key.endswith('_DB_URL')}
 
     if db_url_vars:
         for key, value in db_url_vars.items():
-            file.write(f"\{key}={value}\n")
+            file.write(f"\n{key}={value}\n")
     
 
 def copy_env_file_to_services(src_file, root_dir, env_value):
