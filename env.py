@@ -2,6 +2,32 @@ import os
 import shutil
 import argparse
 
+def write_system_variables(file):
+    system_var = os.environ.get("PROD_USER_NAME")
+    file.write(f"\PROD_USER_NAME={system_var}\n")
+    
+    system_var = os.environ.get("PROD_USER_PSWD")
+    file.write(f"\PROD_USER_PSWD={system_var}\n")
+    
+    system_var = os.environ.get("SECRET_KEY")
+    file.write(f"\SECRET_KEY={system_var}\n")
+    
+    system_var = os.environ.get("EURIKA_IP")
+    file.write(f"\EURIKA_IP={system_var}\n")
+    
+    system_var = os.environ.get("API_KEY")
+    file.write(f"\API_KEY={system_var}\n")
+    
+    system_var = os.environ.get("GOOGLE_CLIENT_SECRET")
+    file.write(f"\GOOGLE_CLIENT_SECRET={system_var}\n")
+    
+    db_url_vars = {key: value for key, value in os.environ.items() if key.endswith('_DB_URL')}
+
+    if db_url_vars:
+        for key, value in db_url_vars.items():
+            file.write(f"\{key}={value}\n")
+    
+
 def copy_env_file_to_services(src_file, root_dir, env_value):
     if not os.path.isfile(src_file):
         print(f"Source file {src_file} does not exist.")
@@ -15,6 +41,8 @@ def copy_env_file_to_services(src_file, root_dir, env_value):
                 shutil.copy(src_file, dest_file)
                 with open(dest_file, 'a') as file:
                     file.write(f"\nENV={env_value}\n")
+                    if (env_value == "prod"):
+                        write_system_variables(file)
                 print(f"Copied .env to: {subdir}")
             except Exception as e:
                 print(f"Error copying .env to {subdir}: {e}")
