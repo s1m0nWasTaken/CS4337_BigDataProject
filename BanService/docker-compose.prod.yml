@@ -5,7 +5,7 @@ services:
     networks:
       - netw
     ports:
-      - "${BAN_SERVER_PORT}:${BAN_CONTAINER_PORT}"
+      - "${BAN_CONTAINER_PORT}:${BAN_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:

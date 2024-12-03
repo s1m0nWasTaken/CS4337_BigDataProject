@@ -8,7 +8,7 @@ services:
     networks:
       - netw
     ports:
-      - "${RATE_SERVER_PORT}:${RATE_CONTAINER_PORT}"
+      - "${RATE_CONTAINER_PORT}:${RATE_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:

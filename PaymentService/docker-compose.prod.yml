@@ -8,7 +8,7 @@ services:
     networks:
       - netw
     ports:
-      - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+      - "${PAYMENT_CONTAINER_PORT}:${PAYMENT_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:

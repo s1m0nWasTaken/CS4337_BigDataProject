@@ -7,7 +7,7 @@ services:
     networks:
       - netw
     ports:
-      - "${ORDER_SERVER_PORT}:${ORDER_CONTAINER_PORT}"
+      - "${ORDER_CONTAINER_PORT}:${ORDER_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:

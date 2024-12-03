@@ -8,7 +8,7 @@ services:
     networks:
       - netw
     ports:
-      - "${MSG_SERVER_PORT}:${MSG_CONTAINER_PORT}"
+      - "${MSG_CONTAINER_PORT}:${MSG_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:
