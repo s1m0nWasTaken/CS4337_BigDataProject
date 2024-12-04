@@ -37,13 +37,28 @@ public class UserService {
 
   @GetMapping("/users") // pass an isHidden field in json body to choose
   public ResponseEntity<Map<String, Object>> users(
-      @RequestParam(required = false) Boolean isHidden) {
+      @RequestParam(required = false) Boolean isHidden,
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
+
     try {
       if (isHidden != null) {
         boolean hidden = isHidden;
         List<User> users =
             jdbcTemplate.query(
-                "SELECT * FROM User WHERE isHidden = ?", new UserRowMapper(), hidden);
+                "SELECT * FROM User WHERE isHidden = ? AND id > ? ORDER BY id LIMIT ?",
+                new UserRowMapper(),
+                hidden,
+                lastId,
+                pageSize);
 
         return ResponseEntity.ok(Map.of("success", users));
       } else {
