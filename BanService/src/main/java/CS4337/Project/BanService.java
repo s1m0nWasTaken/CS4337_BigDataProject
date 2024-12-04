@@ -21,11 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -136,9 +132,24 @@ public class BanService {
   }
 
   @GetMapping("/user")
-  public ResponseEntity<Map<String, Object>> getUsersBans() {
+  public ResponseEntity<Map<String, Object>> getUsersBans(
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
     try {
-      List<UserBan> users = jdbcTemplate.query("SELECT * FROM `UserBan`", new UserBanMapper());
+      List<UserBan> users =
+          jdbcTemplate.query(
+              "SELECT * FROM `UserBan` WHERE id > ? ORDER BY id LIMIT ?",
+              new UserBanMapper(),
+              lastId,
+              pageSize);
 
       return ResponseEntity.ok(Map.of("success", users));
     } catch (DataAccessException e) {
@@ -196,9 +207,24 @@ public class BanService {
   }
 
   @GetMapping("/shopItem")
-  public ResponseEntity<Map<String, Object>> getShops() {
+  public ResponseEntity<Map<String, Object>> getShops(
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
     try {
-      List<ShopBan> shops = jdbcTemplate.query("SELECT * FROM `ShopItemBan`", new ShopBanMapper());
+      List<ShopBan> shops =
+          jdbcTemplate.query(
+              "SELECT * FROM `ShopItemBan` WHERE id > ? ORDER BY id LIMIT ?",
+              new ShopBanMapper(),
+              lastId,
+              pageSize);
       return ResponseEntity.ok(Map.of("success", shops));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
