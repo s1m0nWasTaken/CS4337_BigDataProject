@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     container_name: userdb
     environment:
-      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
       MYSQL_DATABASE: user_service
     networks:
       - netw
