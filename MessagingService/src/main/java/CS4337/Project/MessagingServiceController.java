@@ -28,9 +28,20 @@ public class MessagingServiceController {
   }
 
   @GetMapping("/ChatParticipants")
-  public ResponseEntity<Map<String, Object>> getChatParticipants() {
+  public ResponseEntity<Map<String, Object>> getChatParticipants(
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
     try {
-      List<ChatParticipant> participants = chatParticipantRepository.getAllChatParticipant();
+      List<ChatParticipant> participants =
+          chatParticipantRepository.getAllChatParticipant(lastId, pageSize);
       return ResponseEntity.ok(Map.of("success", participants));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -93,9 +104,19 @@ public class MessagingServiceController {
   }
 
   @GetMapping("/Messages")
-  public ResponseEntity<Map<String, Object>> getMessages() {
+  public ResponseEntity<Map<String, Object>> getMessages(
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
     try {
-      List<Message> messages = messageRepository.getAllMessages();
+      List<Message> messages = messageRepository.getAllMessages(lastId, pageSize);
       return ResponseEntity.ok(Map.of("success", messages));
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
