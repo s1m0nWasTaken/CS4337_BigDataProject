@@ -1,0 +1,18 @@
+services:
+  user-service:
+    image: userservice
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    networks:
+      - netw
+    ports:
+      - "${USER_CONTAINER_PORT}:${USER_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env
+networks:
+  netw:
+    driver: bridge

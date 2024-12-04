@@ -6,7 +6,9 @@ services:
       - netw
     ports:
       - "8761:8761"
+    build:
+      context: .
+      dockerfile: Dockerfile
 networks:
   netw:
-    external: true
     driver: bridge

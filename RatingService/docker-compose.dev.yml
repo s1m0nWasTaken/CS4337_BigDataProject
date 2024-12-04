@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     container_name: ratingDB
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
       MYSQL_DATABASE: rating_service
     networks:
       - netw
@@ -24,6 +24,8 @@ services:
       - netw
     ports:
       - "${RATE_SERVER_PORT}:${RATE_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
 

@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     container_name: orderdb
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
       MYSQL_DATABASE: order_service
     networks:
       - netw
@@ -11,6 +11,7 @@ services:
       - "${ORDER_MYSQL_SERVER_PORT}:${ORDER_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
   order-service:
     image: orderservice
     depends_on:
@@ -20,8 +21,11 @@ services:
       - netw
     ports:
       - "${ORDER_SERVER_PORT}:${ORDER_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
+
 networks:
   netw:
     external: true

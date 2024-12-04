@@ -1,0 +1,16 @@
+services:
+  ban-service:
+    image: banservice
+    container_name: ban-service
+    networks:
+      - netw
+    ports:
+      - "${BAN_CONTAINER_PORT}:${BAN_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env
+
+networks:
+  netw:
+    driver: bridge
