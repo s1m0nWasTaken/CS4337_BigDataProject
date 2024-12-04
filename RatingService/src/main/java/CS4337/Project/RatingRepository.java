@@ -26,9 +26,9 @@ public class RatingRepository {
     return jdbcTemplate.query(sql, new Object[] {shopid, userid}, this::mapRowToRating);
   }
 
-  public List<Rating> getRatingByShopId(int shopid) {
-    String sql = "SELECT * FROM ShopRating WHERE shopid = ?";
-    return jdbcTemplate.query(sql, new Object[] {shopid}, this::mapRowToRating);
+  public List<Rating> getRatingByShopId(int shopid, int lastId, int pageSize) {
+    String sql = "SELECT * FROM ShopRating WHERE shopid = ? AND id > ? ORDER BY id LIMIT ?";
+    return jdbcTemplate.query(sql, new Object[] {shopid, lastId, pageSize}, this::mapRowToRating);
   }
 
   public int updateRating(int id, String message, int rating) {
