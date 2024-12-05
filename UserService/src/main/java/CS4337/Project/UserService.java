@@ -1,6 +1,7 @@
 package CS4337.Project;
 
 import CS4337.Project.Shared.Models.User;
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -163,6 +161,18 @@ public class UserService {
     }
   }
 
+  @PutMapping("user/role/{id}")
+  public ResponseEntity<Map<String, Object>> updateUserRole(
+      @PathVariable("id") int id, @RequestParam String role) {
+    try {
+      String sql = "UPDATE `User` SET userType = ? WHERE id = ?";
+      int updatedRows = jdbcTemplate.update(sql, role, id);
+      return ResponseEntity.ok(Map.of("success", String.valueOf(updatedRows)));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @PutMapping("user/ban/{id}")
   public ResponseEntity<Map<String, Object>> banUser(
       @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
@@ -181,18 +191,11 @@ public class UserService {
   }
 
   protected boolean isUserAuthorized(int id) { // change to protected to let test mock true return
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
-    if (role.equalsIgnoreCase("ROLE_admin")) {
+    if (AuthUtils.isUserAdmin()) {
       return true;
     }
 
-    int userId = Integer.parseInt((String) authentication.getPrincipal());
+    int userId = AuthUtils.getUserId();
 
     if (userId == id) {
       return true;

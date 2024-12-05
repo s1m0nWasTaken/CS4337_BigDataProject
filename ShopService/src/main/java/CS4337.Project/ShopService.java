@@ -1,6 +1,7 @@
 package CS4337.Project;
 
 import CS4337.Project.Shared.Models.ShopItem;
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,6 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,7 +79,7 @@ public class ShopService {
       shop.setShopOwnerid(
           Integer.parseInt(
               (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
-    } else if (!isUserAdmin()) {
+    } else if (!AuthUtils.isUserAdmin()) {
       return Map.of("error", "You do not have permission to create shops");
     }
 
@@ -190,7 +189,7 @@ public class ShopService {
   @PostMapping("/shopItem")
   public Map<String, Object> addShopItem(@RequestBody ShopItem shopItem) {
     int shopOwnerId = getShopOwnerIdByShopItem(shopItem);
-    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
       return Map.of("error", "You do not have permission to add shop items");
     }
 
@@ -215,7 +214,7 @@ public class ShopService {
   @PutMapping("/shopItem/{id}")
   public Map<String, Object> updateShopItem(@PathVariable int id, @RequestBody ShopItem shopItem) {
     int shopOwnerId = getShopOwnerIdByShopItemId(id);
-    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
       return Map.of("error", "You do not have permission to edit this shop");
     }
 
@@ -267,7 +266,7 @@ public class ShopService {
   @PutMapping("/shop/{id}")
   public Map<String, Object> updateShop(@PathVariable int id, @RequestBody Shop shop) {
     int shopOwnerId = getShopOwnerIdFromShopId(id);
-    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
       return Map.of("error", "You do not have permission to edit this shop");
     }
 
@@ -324,7 +323,7 @@ public class ShopService {
   @DeleteMapping("/shop/{id}")
   public Map<String, Object> deleteShop(@PathVariable int id) {
     int shopOwnerId = getShopOwnerIdFromShopId(id);
-    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
       return Map.of("error", "You do not have permission to delete this shop");
     }
 
@@ -346,7 +345,7 @@ public class ShopService {
   @DeleteMapping("/shopItem/{id}")
   public Map<String, Object> deleteShopItem(@PathVariable int id) {
     int shopOwnerId = getShopOwnerIdByShopItemId(id);
-    if (!isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !isUserOwnerOfShop(shopOwnerId)) {
       return Map.of("error", "You do not have permission to delete this shop item");
     }
 
@@ -383,24 +382,13 @@ public class ShopService {
   }
 
   protected boolean isUserShopOwner() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
+    String role = AuthUtils.getUserRole();
     return role.equalsIgnoreCase("ROLE_shopowner");
   }
 
   protected boolean isUserOwnerOfShop(int id) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    int userId = Integer.parseInt((String) authentication.getPrincipal());
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
+    int userId = AuthUtils.getUserId();
+    String role = AuthUtils.getUserRole();
 
     return role.equalsIgnoreCase("ROLE_shopowner") && userId == id;
   }
@@ -436,16 +424,5 @@ public class ShopService {
     }
 
     return -1;
-  }
-
-  protected boolean isUserAdmin() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
-    return role.equalsIgnoreCase("ROLE_admin");
   }
 }

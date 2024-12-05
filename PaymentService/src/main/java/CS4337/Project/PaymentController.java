@@ -2,6 +2,7 @@ package CS4337.Project;
 
 import CS4337.Project.Shared.DTO.TransactionRequest;
 import CS4337.Project.Shared.Models.Transaction;
+import CS4337.Project.Shared.Security.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ public class PaymentController {
 
   @PostMapping("/create")
   public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest request) {
-    if (!(paymentService.isUserAdmin() || paymentService.getUserId() == request.getUserId())) {
+    if (!(AuthUtils.isUserAdmin() || AuthUtils.getUserId() == request.getUserId())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body("You are not authorized to create this transaction");
     }
@@ -35,8 +36,7 @@ public class PaymentController {
     }
     Transaction transaction = paymentService.getTransaction(transactionId);
 
-    if (!(paymentService.isUserAdmin()
-        || paymentService.getUserId() == transaction.getSourceUserId())) {
+    if (!(AuthUtils.isUserAdmin() || AuthUtils.getUserId() == transaction.getSourceUserId())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body("You are not authorized to view this transaction");
     }

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import CS4337.Project.Shared.Security.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,12 +42,14 @@ public class RatingControllerTest {
 
   @BeforeEach
   void setUp() {
-    lenient().doReturn(true).when(ratingService).isUserAdmin();
     lenient().doReturn(true).when(ratingService).isUserRatingOwner(anyInt());
   }
 
   @Test
   public void testAddRating() throws Exception {
+    MockedStatic<AuthUtils> authUtilsMock = mockStatic(AuthUtils.class);
+    authUtilsMock.when(() -> AuthUtils.getUserId()).thenReturn(1);
+
     Map<String, Object> payload =
         Map.of(
             "shopid", 1,
