@@ -46,7 +46,7 @@ public class PaymentService {
     transaction.setTimeStamp(new Date());
     transactionRepository.save(transaction);
 
-    int newQuantity = request.getQuantity();
+    int newQuantity = shopItem.getStock() - request.getQuantity();
     updateShopItemStock(request.getShopItemId(), newQuantity);
 
     transaction.setTransactionStatus("SUCCESS");
