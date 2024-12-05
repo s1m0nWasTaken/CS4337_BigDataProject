@@ -24,6 +24,7 @@ public class SecurityConfig {
             request -> {
               request.requestMatchers("/users").hasRole("admin");
               request.requestMatchers("/user/ban/*").hasRole("admin");
+              request.requestMatchers("/user/role/*").hasRole("admin");
               request.anyRequest().authenticated();
             })
         .csrf(AbstractHttpConfigurer::disable)
