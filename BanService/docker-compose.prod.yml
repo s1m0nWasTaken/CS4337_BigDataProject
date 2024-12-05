@@ -2,6 +2,9 @@ services:
   ban-service:
     image: banservice
     container_name: ban-service
+    build:
+      context: .
+      dockerfile: Dockerfile
     networks:
       - netw
     ports:
