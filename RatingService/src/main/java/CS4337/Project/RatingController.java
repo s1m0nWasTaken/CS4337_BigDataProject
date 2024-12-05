@@ -89,8 +89,18 @@ public class RatingController {
   }
 
   @GetMapping("/shop/{shopid}")
-  public ResponseEntity<List<Rating>> getRatingsByShopId(@PathVariable int shopid) {
-    List<Rating> ratings = ratingRepository.getRatingByShopId(shopid);
+  public ResponseEntity<List<Rating>> getRatingsByShopId(
+      @PathVariable int shopid,
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
+    List<Rating> ratings = ratingRepository.getRatingByShopId(shopid, lastId, pageSize);
     return ResponseEntity.ok(ratings);
   }
 }

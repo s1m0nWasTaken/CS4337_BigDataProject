@@ -103,7 +103,7 @@ public class RatingControllerTest {
     rating.setMessage("Great service!");
     rating.setRating(5);
 
-    when(ratingRepository.getRatingByShopId(1)).thenReturn(List.of(rating));
+    when(ratingRepository.getRatingByShopId(1, 0, 50)).thenReturn(List.of(rating));
 
     mockMvc
         .perform(get("/ratings/shop/1"))

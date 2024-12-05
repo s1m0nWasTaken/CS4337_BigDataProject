@@ -35,9 +35,9 @@ class ChatParticipantRepository implements RowMapper<ChatParticipant> {
     return jdbcTemplate.update(sqlInsert, userid1, userid2);
   }
 
-  public List<ChatParticipant> getAllChatParticipant() {
-    String sql = "SELECT * FROM ChatParticipants";
-    return jdbcTemplate.query(sql, this);
+  public List<ChatParticipant> getAllChatParticipant(int lastId, int pageSize) {
+    String sql = "SELECT * FROM ChatParticipants WHERE id > ? ORDER BY id LIMIT ?";
+    return jdbcTemplate.query(sql, new Object[] {lastId, pageSize}, this);
   }
 
   public int delChatParticipant(int chatid) {
