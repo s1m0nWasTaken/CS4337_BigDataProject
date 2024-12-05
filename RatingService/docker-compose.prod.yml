@@ -5,15 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    networks:
-      - netw
+    network_mode: host
     ports:
       - "${RATE_CONTAINER_PORT}:${RATE_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:
       - .env
-
-networks:
-  netw:
-    driver: bridge

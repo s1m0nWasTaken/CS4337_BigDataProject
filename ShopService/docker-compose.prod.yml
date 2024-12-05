@@ -5,15 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: shop-service
-    networks:
-      - netw
+    network_mode: host
     ports:
       - "${SHOP_CONTAINER_PORT}:${SHOP_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:
       - .env
-
-networks:
-  netw:
-    driver: bridge

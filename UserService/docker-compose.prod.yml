@@ -5,14 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: user-service
-    networks:
-      - netw
+    network_mode: host
     ports:
       - "${USER_CONTAINER_PORT}:${USER_CONTAINER_PORT}"
     environment:
       - ENV=prod
     env_file:
-      - .env
-networks:
-  netw:
-    driver: bridge
+      - .env_file
