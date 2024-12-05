@@ -11,4 +11,4 @@ services:
     environment:
       - ENV=prod
     env_file:
-      - .env_file
+      - .env
