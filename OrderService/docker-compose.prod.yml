@@ -2,6 +2,9 @@ services:
   order-service:
     image: orderservice
     container_name: order-service
+    build:
+      context: .
+      dockerfile: Dockerfile
     networks:
       - netw
     ports:
