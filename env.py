@@ -4,22 +4,28 @@ import argparse
 
 def write_system_variables(file):
     system_var = os.environ.get("PROD_USER_NAME")
-    file.write(f"\nPROD_USER_NAME={system_var}\n")
+    if system_var:
+        file.write(f"\nPROD_USER_NAME={system_var}\n")
     
     system_var = os.environ.get("PROD_USER_PSWD")
-    file.write(f"\nPROD_USER_PSWD={system_var}\n")
+    if system_var:
+        file.write(f"\nPROD_USER_PSWD={system_var}\n")
     
     system_var = os.environ.get("SECRET_KEY")
-    file.write(f"\nSECRET_KEY={system_var}\n")
+    if system_var:
+        file.write(f"\nSECRET_KEY={system_var}\n")
     
     system_var = os.environ.get("EURIKA_IP")
-    file.write(f"\nEURIKA_IP={system_var}\n")
+    if system_var:
+        file.write(f"\nEURIKA_IP={system_var}\n")
     
     system_var = os.environ.get("API_KEY")
-    file.write(f"\nAPI_KEY={system_var}\n")
+    if system_var:
+        file.write(f"\nAPI_KEY={system_var}\n")
     
     system_var = os.environ.get("GOOGLE_CLIENT_SECRET")
-    file.write(f"\nGOOGLE_CLIENT_SECRET={system_var}\n")
+    if system_var:
+        file.write(f"\nGOOGLE_CLIENT_SECRET={system_var}\n")
     
     db_url_vars = {key: value for key, value in os.environ.items() if key.endswith('_DB_URL')}
 
