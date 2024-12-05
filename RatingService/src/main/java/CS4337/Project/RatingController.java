@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,11 @@ public class RatingController {
   public ResponseEntity<Map<String, String>> addRating(@RequestBody Map<String, Object> payload) {
     try {
       Integer shopid = (Integer) payload.get("shopid");
-      Integer userid = (Integer) payload.get("userid");
       String message = (String) payload.get("message");
       Integer rating = (Integer) payload.get("rating");
+      int userid = AuthUtils.getUserId();
 
-      if (shopid == null || userid == null || message == null || rating == null) {
+      if (shopid == null || message == null || rating == null) {
         return ResponseEntity.badRequest().body(Map.of("error", "All parameters are required"));
       }
       int amountOfRating = ratingRepository.checkRating(shopid, userid).size();
@@ -49,7 +50,7 @@ public class RatingController {
   public ResponseEntity<Map<String, String>> updateRating(
       @PathVariable int id, @RequestBody Map<String, Object> payload) {
     int ratingOwnerId = ratingRepository.getUserIdByRatingId(id);
-    if (!ratingService.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to edit this rating"));
     }
@@ -75,7 +76,7 @@ public class RatingController {
   @DeleteMapping("/delete/{id}")
   public ResponseEntity<Map<String, String>> deleteRating(@PathVariable int id) {
     int ratingOwnerId = ratingRepository.getUserIdByRatingId(id);
-    if (!ratingService.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
+    if (!AuthUtils.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to delete this rating"));
     }

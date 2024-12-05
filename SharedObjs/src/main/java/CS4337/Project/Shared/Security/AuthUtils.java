@@ -6,18 +6,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AuthUtils {
   public static boolean isUserAdmin() {
+    String role = getUserRole();
+    return role.equalsIgnoreCase("ROLE_admin");
+  }
+
+  public static String getUserRole() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
         authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .findFirst()
             .orElse(null);
-
-    if (role.equalsIgnoreCase("ROLE_admin")) {
-      return true;
-    }
-
-    return false;
+    return role;
   }
 
   public static int getUserId() {
