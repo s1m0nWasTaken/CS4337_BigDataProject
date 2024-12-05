@@ -2,20 +2,22 @@ package CS4337.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -31,12 +33,20 @@ public class MessagingServiceTest {
 
   @InjectMocks private MessagingServiceController messagingService;
 
+  private MockedStatic<AuthUtils> mockedAuthUtils;
+
   @BeforeEach
   public void setUp() {
-    MessagingServiceController spyMessagingService = Mockito.spy(messagingService);
-    lenient().doReturn(true).when(spyMessagingService).isUserAdmin();
-    lenient().doReturn(SENDER_ID).when(spyMessagingService).getUserId();
-    messagingService = spyMessagingService;
+    mockedAuthUtils = mockStatic(AuthUtils.class);
+    when(AuthUtils.getUserId()).thenReturn(SENDER_ID);
+    when(AuthUtils.isUserAdmin()).thenReturn(true);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    if (mockedAuthUtils != null) {
+      mockedAuthUtils.close();
+    }
   }
 
   @Test
@@ -138,7 +148,6 @@ public class MessagingServiceTest {
 
   @Test
   public void testRemoveChatWhenNoParticipants() {
-
     int chatId = 1;
     when(chatParticipantRepository.delChatParticipant(chatId)).thenReturn(0);
 

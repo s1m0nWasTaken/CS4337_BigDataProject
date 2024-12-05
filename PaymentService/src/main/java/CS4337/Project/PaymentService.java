@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,22 +54,6 @@ public class PaymentService {
 
   public Transaction getTransaction(int transactionId) {
     return transactionRepository.findById(transactionId).orElse(null);
-  }
-
-  public boolean isUserAdmin() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
-    return role.equalsIgnoreCase("ROLE_admin");
-  }
-
-  public int getUserId() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    return Integer.parseInt((String) auth.getPrincipal());
   }
 
   private ResponseEntity<Map<String, ShopItem>> getShopItemById(int shopItemId) {

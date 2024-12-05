@@ -1,5 +1,6 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +8,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -52,7 +50,7 @@ public class MessagingServiceController {
         return ResponseEntity.badRequest().body(Map.of("error", "User IDs cannot be null."));
       }
 
-      if (!(getUserId() == userid1 || getUserId() == userid2)) {
+      if (!(AuthUtils.getUserId() == userid1 || AuthUtils.getUserId() == userid2)) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(Map.of("error", "You do not have permission to create this chat"));
       }
@@ -71,7 +69,7 @@ public class MessagingServiceController {
 
   @DeleteMapping("/ChatParticipants/{chatid}")
   public ResponseEntity<Map<String, Object>> removeChat(@PathVariable("chatid") int chatid) {
-    if (!isUserAdmin()) {
+    if (!AuthUtils.isUserAdmin()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to delete this chat"));
     }
@@ -115,7 +113,7 @@ public class MessagingServiceController {
           .body(Map.of("error", "Chat ID and Sender ID cannot be null."));
     }
 
-    if (getUserId() != (int) messageDetails.get("senderid")) {
+    if (AuthUtils.getUserId() != (int) messageDetails.get("senderid")) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to send messages"));
     }
@@ -133,7 +131,7 @@ public class MessagingServiceController {
 
   @DeleteMapping("/Messages/{chatid}")
   public ResponseEntity<Map<String, Object>> removeMessage(@PathVariable int chatid) {
-    if (!isUserAdmin()) {
+    if (!AuthUtils.isUserAdmin()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to delete this chat's messages"));
     }
@@ -156,7 +154,7 @@ public class MessagingServiceController {
   @PatchMapping("/Messages/{id}")
   public ResponseEntity<Map<String, Object>> editMessage(
       @PathVariable int id, @RequestParam String content) {
-    if (!(messageRepository.getSenderIdByMessageId(id) == getUserId())) {
+    if (!(messageRepository.getSenderIdByMessageId(id) == AuthUtils.getUserId())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("error", "You do not have permission to edit this message"));
     }
@@ -174,21 +172,5 @@ public class MessagingServiceController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Database error: " + e.getMessage()));
     }
-  }
-
-  protected int getUserId() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    return Integer.parseInt((String) authentication.getPrincipal());
-  }
-
-  protected boolean isUserAdmin() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
-    return role.equalsIgnoreCase("ROLE_admin");
   }
 }

@@ -2,6 +2,7 @@ package CS4337.project;
 
 import CS4337.Project.Shared.DTO.TransactionRequest;
 import CS4337.Project.Shared.Models.Transaction;
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,7 +34,7 @@ public class OrderService {
 
   @PostMapping("/order")
   public ResponseEntity<?> addOrder(@RequestBody Order order) {
-    if (!isUserAdmin() && getUserId() != order.getUserId()) {
+    if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body("You do not have permission to create this order");
     }
@@ -95,7 +93,7 @@ public class OrderService {
         Map<String, Object> orderData = (Map<String, Object>) response.getBody();
         Order order = (Order) orderData.get("success");
 
-        if (!isUserAdmin() && getUserId() != order.getUserId()) {
+        if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
           return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
               .body(Map.of("error", "You do not have permission to update this order"));
         }
@@ -142,7 +140,7 @@ public class OrderService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
       }
 
-      if (!isUserAdmin() && getUserId() != order.getUserId()) {
+      if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body("You do not have permission to view this order");
       }
@@ -154,21 +152,5 @@ public class OrderService {
               Map.of(
                   "error", "Failed to retrieve order with id " + orderId + ": " + e.getMessage()));
     }
-  }
-
-  private int getUserId() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    return Integer.parseInt((String) authentication.getPrincipal());
-  }
-
-  public boolean isUserAdmin() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String role =
-        authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse(null);
-
-    return role.equalsIgnoreCase("ROLE_admin");
   }
 }
