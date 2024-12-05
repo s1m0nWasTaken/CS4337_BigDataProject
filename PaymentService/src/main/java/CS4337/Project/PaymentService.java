@@ -41,13 +41,13 @@ public class PaymentService {
 
     Transaction transaction = new Transaction();
     transaction.setSourceUserId(request.getUserId());
-    transaction.setAmount(2.0 * request.getQuantity());
+    transaction.setAmount(request.getQuantity());
     transaction.setTransactionStatus("PENDING");
     transaction.setTimeStamp(new Date());
     transactionRepository.save(transaction);
 
-    int newQuantity = 5 - request.getQuantity();
-    updateShopItemStock(1, newQuantity);
+    int newQuantity = request.getQuantity();
+    updateShopItemStock(request.getShopItemId(), newQuantity);
 
     transaction.setTransactionStatus("SUCCESS");
     transactionRepository.save(transaction);
