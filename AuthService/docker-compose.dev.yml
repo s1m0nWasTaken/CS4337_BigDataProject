@@ -4,7 +4,7 @@ services:
     container_name: authdb
     environment:
       MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
-      MYSQL_DATABASE: auth-service
+      MYSQL_DATABASE: auth_service
     networks:
       - netw
     ports:

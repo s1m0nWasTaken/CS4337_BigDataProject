@@ -3,7 +3,7 @@ services:
     build:
       dockerfile: Dockerfile
     image: authservice
-    container_name: auth-service
+    container_name: auth_service
     networks:
       - netw
     ports:
