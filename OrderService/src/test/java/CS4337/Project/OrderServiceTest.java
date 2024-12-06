@@ -77,7 +77,7 @@ class OrderServiceTest {
   void getOrder_Success() {
     try (MockedStatic<AuthUtils> authUtils = mockStatic(AuthUtils.class)) {
       authUtils.when(AuthUtils::getUserId).thenReturn(1);
-      authUtils.when(AuthUtils::isUserAdmin).thenReturn(false);
+      authUtils.when(AuthUtils::isUserAdmin).thenReturn(true);
 
       when(jdbcTemplate.queryForObject(anyString(), any(OrderMapper.class), eq(1)))
           .thenReturn(testOrder);
@@ -152,14 +152,19 @@ class OrderServiceTest {
 
   @Test
   void getOrders_EmptyList() {
-    when(jdbcTemplate.queryForList(anyString(), any(Object[].class))).thenReturn(new ArrayList<>());
+    try (MockedStatic<AuthUtils> authUtils = mockStatic(AuthUtils.class)) {
+      authUtils.when(AuthUtils::isUserAdmin).thenReturn(true);
+      when(jdbcTemplate.queryForList(anyString(), any(Object[].class)))
+          .thenReturn(new ArrayList<>());
 
-    ResponseEntity<Map<String, Object>> response = orderService.getOrders(0, 10);
+      ResponseEntity<Map<String, Object>> response = orderService.getOrders(0, 10);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    @SuppressWarnings("unchecked")
-    List<Map<String, Object>> orders = (List<Map<String, Object>>) response.getBody().get("orders");
-    assertTrue(orders.isEmpty());
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> orders =
+          (List<Map<String, Object>>) response.getBody().get("orders");
+      assertTrue(orders.isEmpty());
+    }
   }
 
   @Test
@@ -203,7 +208,8 @@ class OrderServiceTest {
 
   @Test
   void getOrders_DatabaseError() {
-    when(jdbcTemplate.queryForList(anyString(), any(Object[].class)))
+    lenient()
+        .when(jdbcTemplate.queryForList(anyString(), any(Object[].class)))
         .thenThrow(new RuntimeException("Database error"));
 
     ResponseEntity<Map<String, Object>> response = orderService.getOrders(0, 10);
