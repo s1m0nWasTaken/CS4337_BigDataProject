@@ -10,6 +10,16 @@ public class AuthUtils {
     return role.equalsIgnoreCase("ROLE_admin");
   }
 
+  public static boolean isUserOwner() {
+    String role = getUserRole();
+    return role.equalsIgnoreCase("ROLE_shopowner");
+  }
+
+  public static boolean isUser() {
+    String role = getUserRole();
+    return role.equalsIgnoreCase("ROLE_user");
+  }
+
   public static String getUserRole() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String role =
