@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -40,16 +42,25 @@ public class RatingControllerTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  private MockedStatic<AuthUtils> authUtilsMock;
+
   @BeforeEach
   void setUp() {
     lenient().doReturn(true).when(ratingService).isUserRatingOwner(anyInt());
+
+    authUtilsMock = mockStatic(AuthUtils.class);
+    when(AuthUtils.getUserId()).thenReturn(1);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    if (authUtilsMock != null) {
+      authUtilsMock.close();
+    }
   }
 
   @Test
   public void testAddRating() throws Exception {
-    MockedStatic<AuthUtils> authUtilsMock = mockStatic(AuthUtils.class);
-    authUtilsMock.when(() -> AuthUtils.getUserId()).thenReturn(1);
-
     Map<String, Object> payload =
         Map.of(
             "shopid", 1,
@@ -254,7 +265,6 @@ public class RatingControllerTest {
   public void testUpdateRatingUnauthorized() throws Exception {
     Map<String, Object> payload = Map.of("message", "Updated review", "rating", 4);
 
-    when(ratingService.isUserAdmin()).thenReturn(false);
     when(ratingService.isUserRatingOwner(anyInt())).thenReturn(false);
 
     mockMvc
@@ -298,7 +308,6 @@ public class RatingControllerTest {
 
   @Test
   public void testDeleteRatingUnauthorized() throws Exception {
-    when(ratingService.isUserAdmin()).thenReturn(false);
     when(ratingService.isUserRatingOwner(anyInt())).thenReturn(false);
 
     mockMvc
@@ -309,7 +318,7 @@ public class RatingControllerTest {
 
   @Test
   public void testGetRatingsByShopIdEmptyList() throws Exception {
-    when(ratingRepository.getRatingByShopId(1)).thenReturn(List.of());
+    when(ratingRepository.getRatingByShopId(1, 0, 50)).thenReturn(List.of());
 
     mockMvc
         .perform(get("/ratings/shop/1"))
