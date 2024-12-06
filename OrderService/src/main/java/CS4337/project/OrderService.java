@@ -118,8 +118,40 @@ public class OrderService {
   public ResponseEntity<Map<String, Object>> getOrders(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
     try {
-      String sqlQuery = "SELECT * FROM Orders LIMIT ? OFFSET ?";
-      Object[] params = {size, page * size};
+      String sqlQuery = "";
+      Object[] params = {};
+
+      if (AuthUtils.isUserAdmin()) {
+        sqlQuery = "SELECT * FROM Orders LIMIT ? OFFSET ?";
+        params = new Object[] {size, page * size};
+      } else if (AuthUtils.isUserOwner()) {
+        int shopOwnerId = AuthUtils.getUserId();
+
+        String shopIdsQuery = "SELECT id FROM Shop WHERE shopOwnerid = ?";
+        List<Integer> shopIds = jdbcTemplate.queryForList(shopIdsQuery, Integer.class, shopOwnerId);
+
+        if (shopIds.isEmpty()) {
+          return ResponseEntity.status(HttpStatus.OK)
+              .body(Map.of("success", 1, "orders", List.of()));
+        }
+
+        sqlQuery =
+            "SELECT o.* FROM Orders o "
+                + "JOIN ShopItems si ON o.shopItemid = si.id "
+                + "WHERE si.shopid IN (%s) LIMIT ? OFFSET ?";
+        String inClause =
+            String.join(",", shopIds.stream().map(String::valueOf).toArray(String[]::new));
+        sqlQuery = String.format(sqlQuery, inClause);
+
+        params = new Object[] {size, page * size};
+      } else if (AuthUtils.isUser()) {
+        sqlQuery = "SELECT * FROM Orders WHERE userId = ? LIMIT ? OFFSET ?";
+        int userId = AuthUtils.getUserId();
+        params = new Object[] {userId, size, page * size};
+      } else {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(Map.of("error", "You do not have permission to view orders"));
+      }
 
       List<Map<String, Object>> orders = jdbcTemplate.queryForList(sqlQuery, params);
 
@@ -140,7 +172,7 @@ public class OrderService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
       }
 
-      if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
+      if (!AuthUtils.isUserAdmin() || AuthUtils.getUserId() != order.getUserId()) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body("You do not have permission to view this order");
       }
