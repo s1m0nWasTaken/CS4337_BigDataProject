@@ -2,17 +2,22 @@ package CS4337.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class MessagingServiceTest {
+  private static final int SENDER_ID = 1;
 
   @Mock private ChatParticipantRepository chatParticipantRepository;
 
@@ -27,11 +33,27 @@ public class MessagingServiceTest {
 
   @InjectMocks private MessagingServiceController messagingService;
 
+  private MockedStatic<AuthUtils> mockedAuthUtils;
+
+  @BeforeEach
+  public void setUp() {
+    mockedAuthUtils = mockStatic(AuthUtils.class);
+    when(AuthUtils.getUserId()).thenReturn(SENDER_ID);
+    when(AuthUtils.isUserAdmin()).thenReturn(true);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    if (mockedAuthUtils != null) {
+      mockedAuthUtils.close();
+    }
+  }
+
   @Test
   public void testSendMessageSuccess() {
     Map<String, Object> messageDetails = new HashMap<>();
     messageDetails.put("chatid", 1);
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     when(messageRepository.addMessage(1, 1, "Hello!")).thenReturn(1);
@@ -46,7 +68,7 @@ public class MessagingServiceTest {
   @Test
   public void testSendMessageMissingChatId() {
     Map<String, Object> messageDetails = new HashMap<>();
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);
@@ -59,9 +81,9 @@ public class MessagingServiceTest {
   public void testGetChatParticipantsSuccess() {
     List<ChatParticipant> participants =
         Arrays.asList(new ChatParticipant(1, 1, 2), new ChatParticipant(2, 3, 4));
-    when(chatParticipantRepository.getAllChatParticipant()).thenReturn(participants);
+    when(chatParticipantRepository.getAllChatParticipant(0, 50)).thenReturn(participants);
 
-    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
+    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants(0, 50);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(participants, response.getBody().get("success"));
@@ -69,10 +91,10 @@ public class MessagingServiceTest {
 
   @Test
   public void testGetChatParticipantsDatabaseError() {
-    when(chatParticipantRepository.getAllChatParticipant())
+    when(chatParticipantRepository.getAllChatParticipant(0, 50))
         .thenThrow(new DataAccessException("Database error") {});
 
-    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
+    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants(0, 50);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertEquals("Database error: Database error", response.getBody().get("error"));
@@ -104,10 +126,10 @@ public class MessagingServiceTest {
   @Test
   public void testGetChatParticipantsUnexpectedException() {
 
-    when(chatParticipantRepository.getAllChatParticipant())
+    when(chatParticipantRepository.getAllChatParticipant(0, 50))
         .thenThrow(new DataAccessException("Unexpected error") {});
 
-    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
+    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants(0, 50);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertEquals("Database error: Unexpected error", response.getBody().get("error"));
@@ -116,9 +138,10 @@ public class MessagingServiceTest {
   @Test
   public void testGetChatParticipantsWhenNoneExist() {
 
-    when(chatParticipantRepository.getAllChatParticipant()).thenReturn(Collections.emptyList());
+    when(chatParticipantRepository.getAllChatParticipant(0, 50))
+        .thenReturn(Collections.emptyList());
 
-    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants();
+    ResponseEntity<Map<String, Object>> response = messagingService.getChatParticipants(0, 50);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(Collections.emptyList(), response.getBody().get("success"));
@@ -126,7 +149,6 @@ public class MessagingServiceTest {
 
   @Test
   public void testRemoveChatWhenNoParticipants() {
-
     int chatId = 1;
     when(chatParticipantRepository.delChatParticipant(chatId)).thenReturn(0);
 
@@ -142,7 +164,7 @@ public class MessagingServiceTest {
 
     Map<String, Object> messageDetails = new HashMap<>();
     messageDetails.put("chatid", null);
-    messageDetails.put("senderid", 1);
+    messageDetails.put("senderid", SENDER_ID);
     messageDetails.put("content", "Hello!");
 
     ResponseEntity<Map<String, Object>> response = messagingService.sendMessage(messageDetails);

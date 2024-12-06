@@ -1,0 +1,35 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: paymentdb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
+      MYSQL_DATABASE: payment_service
+    networks:
+      - netw
+    ports:
+      - "${PAYMENT_MYSQL_SERVER_PORT}:${PAYMENT_MYSQL_CONTAINER_PORT}"
+    volumes:
+      - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
+  payment-service:
+    image: paymentservice:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-service
+    depends_on:
+      - mysql
+    networks:
+      - netw
+    ports:
+      - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
+    env_file:
+      - .env
+
+networks:
+  netw:
+    external: true
+    driver: bridge

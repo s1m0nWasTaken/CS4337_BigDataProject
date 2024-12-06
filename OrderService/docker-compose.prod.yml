@@ -1,0 +1,14 @@
+services:
+  order-service:
+    image: orderservice
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    ports:
+      - "${ORDER_CONTAINER_PORT}:${ORDER_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

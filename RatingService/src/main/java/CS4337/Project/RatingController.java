@@ -1,8 +1,10 @@
 package CS4337.Project;
 
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,21 +12,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/ratings")
 public class RatingController {
   private final RatingRepository ratingRepository;
+  private final RatingService ratingService;
 
   @Autowired
-  public RatingController(RatingRepository ratingRepository) {
+  public RatingController(RatingRepository ratingRepository, RatingService ratingService) {
     this.ratingRepository = ratingRepository;
+    this.ratingService = ratingService;
   }
 
   @PostMapping("/add")
   public ResponseEntity<Map<String, String>> addRating(@RequestBody Map<String, Object> payload) {
     try {
       Integer shopid = (Integer) payload.get("shopid");
-      Integer userid = (Integer) payload.get("userid");
       String message = (String) payload.get("message");
       Integer rating = (Integer) payload.get("rating");
+      int userid = AuthUtils.getUserId();
 
-      if (shopid == null || userid == null || message == null || rating == null) {
+      if (shopid == null || message == null || rating == null) {
         return ResponseEntity.badRequest().body(Map.of("error", "All parameters are required"));
       }
       int amountOfRating = ratingRepository.checkRating(shopid, userid).size();
@@ -45,6 +49,12 @@ public class RatingController {
   @PutMapping("/update/{id}")
   public ResponseEntity<Map<String, String>> updateRating(
       @PathVariable int id, @RequestBody Map<String, Object> payload) {
+    int ratingOwnerId = ratingRepository.getUserIdByRatingId(id);
+    if (!AuthUtils.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to edit this rating"));
+    }
+
     try {
       String message = (String) payload.get("message");
       Integer rating = (Integer) payload.get("rating");
@@ -65,6 +75,12 @@ public class RatingController {
 
   @DeleteMapping("/delete/{id}")
   public ResponseEntity<Map<String, String>> deleteRating(@PathVariable int id) {
+    int ratingOwnerId = ratingRepository.getUserIdByRatingId(id);
+    if (!AuthUtils.isUserAdmin() && !ratingService.isUserRatingOwner(ratingOwnerId)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to delete this rating"));
+    }
+
     int result = ratingRepository.deleteRating(id);
     return ResponseEntity.ok(
         Map.of(
@@ -73,8 +89,18 @@ public class RatingController {
   }
 
   @GetMapping("/shop/{shopid}")
-  public ResponseEntity<List<Rating>> getRatingsByShopId(@PathVariable int shopid) {
-    List<Rating> ratings = ratingRepository.getRatingByShopId(shopid);
+  public ResponseEntity<List<Rating>> getRatingsByShopId(
+      @PathVariable int shopid,
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
+    List<Rating> ratings = ratingRepository.getRatingByShopId(shopid, lastId, pageSize);
     return ResponseEntity.ok(ratings);
   }
 }

@@ -1,0 +1,14 @@
+services:
+  ban-service:
+    image: banservice
+    container_name: ban-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    ports:
+      - "${BAN_CONTAINER_PORT}:${BAN_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

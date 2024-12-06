@@ -3,8 +3,8 @@ services:
     image: mysql:latest
     container_name: authdb
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: auth-service
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
+      MYSQL_DATABASE: auth_service
     networks:
       - netw
     ports:
@@ -21,6 +21,8 @@ services:
       - netw
     ports:
       - "${AUTH_SERVER_PORT}:${AUTH_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
     depends_on:

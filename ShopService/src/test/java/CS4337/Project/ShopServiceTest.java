@@ -5,22 +5,32 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import CS4337.Project.Shared.Models.ShopItem;
+import CS4337.Project.Shared.Security.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 @WebMvcTest(ShopService.class)
+@Import(TestSecurityConfig.class)
 public class ShopServiceTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean private ShopService shopService;
+
+  @MockBean private JwtUtils jwtUtils;
+
+  @MockBean
+  @Qualifier("authRestTemplate") private RestTemplate restTemplate;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 

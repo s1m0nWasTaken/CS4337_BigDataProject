@@ -1,31 +1,34 @@
 services:
   mysql:
     image: mysql:latest
-    container_name: messagingDB
+    container_name: shopdb
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: messaging_service
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
+      MYSQL_DATABASE: shop_service
     networks:
       - netw
     ports:
-      - "${MSG_MYSQL_SERVER_PORT}:${MSG_MYSQL_CONTAINER_PORT}"
+      - "${SHOP_MYSQL_SERVER_PORT}:${SHOP_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
 
-  messaging-service:
-    image: msgservice
-    container_name: msgservice
+  shop-service:
+    image: shopservice
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
       - mysql
+    container_name: shop-service
     networks:
       - netw
     ports:
-      - "${MSG_SERVER_PORT}:${MSG_CONTAINER_PORT}"
+      - "${SHOP_SERVER_PORT}:${SHOP_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
+
 networks:
   netw:
     external: true

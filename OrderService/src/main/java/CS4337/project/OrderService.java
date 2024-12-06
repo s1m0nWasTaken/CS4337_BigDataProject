@@ -2,10 +2,12 @@ package CS4337.project;
 
 import CS4337.Project.Shared.DTO.TransactionRequest;
 import CS4337.Project.Shared.Models.Transaction;
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -21,7 +23,8 @@ public class OrderService {
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  @Qualifier("msRestTemplate") private RestTemplate restTemplate;
 
   private final String PAYMENT_SERVICE_URL = "http://PAYMENTSERVICE";
 
@@ -31,6 +34,11 @@ public class OrderService {
 
   @PostMapping("/order")
   public ResponseEntity<?> addOrder(@RequestBody Order order) {
+    if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body("You do not have permission to create this order");
+    }
+
     try {
       // Validate payment before making order
       TransactionRequest transactionRequest = new TransactionRequest();
@@ -80,6 +88,17 @@ public class OrderService {
   public ResponseEntity<Map<String, Object>> updateOrderStatus(
       @PathVariable int orderId, @RequestParam String status) {
     try {
+      ResponseEntity<?> response = getOrder(orderId);
+      if (response.getStatusCode() != HttpStatus.OK) {
+        Map<String, Object> orderData = (Map<String, Object>) response.getBody();
+        Order order = (Order) orderData.get("success");
+
+        if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(Map.of("error", "You do not have permission to update this order"));
+        }
+      }
+
       String sqlUpdate = "UPDATE Orders SET orderStatus = ? WHERE id = ?";
       int rowsAffected = jdbcTemplate.update(sqlUpdate, status, orderId);
 
@@ -108,6 +127,30 @@ public class OrderService {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(Map.of("error", "Failed to retrieve orders: " + e.getMessage()));
+    }
+  }
+
+  @GetMapping("/order/{orderId}")
+  public ResponseEntity<?> getOrder(@PathVariable int orderId) {
+    try {
+      String sql = "SELECT * FROM Orders WHERE id = ?";
+      Order order = jdbcTemplate.queryForObject(sql, new OrderMapper(), orderId);
+
+      if (order == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
+      }
+
+      if (!AuthUtils.isUserAdmin() && AuthUtils.getUserId() != order.getUserId()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("You do not have permission to view this order");
+      }
+
+      return ResponseEntity.status(HttpStatus.OK).body(order);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(
+              Map.of(
+                  "error", "Failed to retrieve order with id " + orderId + ": " + e.getMessage()));
     }
   }
 }

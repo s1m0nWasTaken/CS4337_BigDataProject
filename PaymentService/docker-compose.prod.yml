@@ -1,0 +1,14 @@
+services:
+  payment-service:
+    image: paymentservice:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-service
+    network_mode: host
+    ports:
+      - "${PAYMENT_CONTAINER_PORT}:${PAYMENT_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

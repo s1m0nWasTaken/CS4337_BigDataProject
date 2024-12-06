@@ -3,7 +3,7 @@ services:
     image: mysql:latest
     container_name: userdb
     environment:
-      MYSQL_ROOT_PASSWORD: ${USER_PSWD}
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
       MYSQL_DATABASE: user_service
     networks:
       - netw
@@ -11,8 +11,12 @@ services:
       - "${USER_MYSQL_SERVER_PORT}:${USER_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
+
   user-service:
     image: userservice
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on :
       - mysql
     container_name: user-service
@@ -20,8 +24,11 @@ services:
       - netw
     ports:
       - "${USER_SERVER_PORT}:${USER_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
+
 networks:
   netw:
     external: true

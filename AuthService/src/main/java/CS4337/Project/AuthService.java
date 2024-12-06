@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,12 @@ public class AuthService {
   @Value("${secret-key}")
   private String secretKey;
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  @Qualifier("msRestTemplate") private RestTemplate restTemplate;
+
+  @Autowired
+  @Qualifier("googleRestTemplate") private RestTemplate googleRestTemplate;
+
   @Autowired private AuthRepository authRepository;
 
   private static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
@@ -58,7 +64,7 @@ public class AuthService {
     HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, httpHeaders);
 
     GoogleTokenInfo tokenInfo =
-        restTemplate.postForObject(TOKEN_URL, requestEntity, GoogleTokenInfo.class);
+        googleRestTemplate.postForObject(TOKEN_URL, requestEntity, GoogleTokenInfo.class);
     return tokenInfo;
   }
 
@@ -68,7 +74,7 @@ public class AuthService {
 
     HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
     ResponseEntity<GoogleUserInfo> response =
-        restTemplate.exchange(USER_INFO_URL, HttpMethod.GET, entity, GoogleUserInfo.class);
+        googleRestTemplate.exchange(USER_INFO_URL, HttpMethod.GET, entity, GoogleUserInfo.class);
 
     return response.getBody();
   }
@@ -101,11 +107,12 @@ public class AuthService {
     HttpEntity<User> requestEntity = new HttpEntity<>(user, httpHeaders);
 
     String response = restTemplate.postForObject(postUserUrl, requestEntity, String.class);
-    user = getUserByEmail(user.getEmail());
 
     if (!response.contains("success") || user == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User registration failed");
     }
+
+    user = getUserByEmail(user.getEmail());
 
     String jwt = generateJWT(user);
     RefreshToken refreshToken = generateRefreshToken(user);
@@ -152,9 +159,9 @@ public class AuthService {
     }
   }
 
-  private String generateJWT(User user) {
+  public String generateJWT(User user) {
     return Jwts.builder()
-        .setSubject(user.getUsername())
+        .setSubject(String.valueOf(user.getId()))
         .claim("role", user.getUserType().name())
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRY))

@@ -22,9 +22,9 @@ public class MessageRepository {
     return jdbcTemplate.update(query, chatid, senderid, content);
   }
 
-  public List<Message> getAllMessages() {
-    String query = "SELECT * FROM Messages";
-    return jdbcTemplate.query(query, messageMapper);
+  public List<Message> getAllMessages(int lastId, int pageSize) {
+    String query = "SELECT * FROM Messages WHERE id > ? ORDER BY id LIMIT ?";
+    return jdbcTemplate.query(query, new Object[] {lastId, pageSize}, messageMapper);
   }
 
   public List<Message> getMessageByChatId(int chatid) {
@@ -40,6 +40,11 @@ public class MessageRepository {
   public int delMessage(int chatid) {
     String query = "DELETE FROM Messages WHERE chatid = ?";
     return jdbcTemplate.update(query, chatid);
+  }
+
+  public int getSenderIdByMessageId(int id) {
+    String query = "SELECT senderid FROM Messages WHERE id = ?";
+    return jdbcTemplate.queryForObject(query, Integer.class, id);
   }
 
   private RowMapper<Message> messageMapper =

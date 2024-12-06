@@ -1,0 +1,15 @@
+services:
+  eureka-service:
+    image: eurekaservice
+    container_name: eureka-service
+    networks:
+      - netw
+    ports:
+      - "8761:8761"
+    build:
+      context: .
+      dockerfile: Dockerfile
+networks:
+  netw:
+    external: true
+    driver: bridge

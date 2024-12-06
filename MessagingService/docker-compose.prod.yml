@@ -1,0 +1,14 @@
+services:
+  messaging-service:
+    image: msgservice
+    container_name: msgservice
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    ports:
+      - "${MSG_CONTAINER_PORT}:${MSG_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

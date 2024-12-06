@@ -2,7 +2,7 @@ package CS4337.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import CS4337.Project.Shared.Models.User;
 import CS4337.Project.Shared.Models.UserType;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -31,13 +32,17 @@ public class UserServiceTest {
   @BeforeEach
   public void setup() {
     testUser = new User(UserType.customer, "johndoe", "john@example.com", "123 Main St");
+    // lenient so it will still make the stub even though it isnt used in every test
+    UserService spyUserService = Mockito.spy(userService);
+    lenient().doReturn(true).when(spyUserService).isUserAuthorized(anyInt());
+    userService = spyUserService;
   }
 
   @Test
   public void testGetAllUsers() {
     when(jdbcTemplate.query(anyString(), any(UserRowMapper.class))).thenReturn(List.of(testUser));
 
-    ResponseEntity<Map<String, Object>> response = userService.users(null);
+    ResponseEntity<Map<String, Object>> response = userService.users(null, 0, 50);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(List.of(testUser), response.getBody().get("success"));
@@ -239,7 +244,7 @@ public class UserServiceTest {
     when(jdbcTemplate.query(eq("SELECT * FROM User"), any(UserRowMapper.class)))
         .thenReturn(allUsers);
 
-    ResponseEntity<Map<String, Object>> response = userService.users(null);
+    ResponseEntity<Map<String, Object>> response = userService.users(null, 0, 50);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(allUsers, response.getBody().get("success"));
@@ -251,10 +256,14 @@ public class UserServiceTest {
         List.of(new User(1, "customer", "hiddenuser", "john@example.com", "Unknown", true));
 
     when(jdbcTemplate.query(
-            eq("SELECT * FROM User WHERE isHidden = ?"), any(UserRowMapper.class), eq(true)))
+            eq("SELECT * FROM User WHERE isHidden = ? AND id > ? ORDER BY id LIMIT ?"),
+            any(UserRowMapper.class),
+            eq(true),
+            eq(0),
+            eq(50)))
         .thenReturn(hiddenUsers);
 
-    ResponseEntity<Map<String, Object>> response = userService.users(true);
+    ResponseEntity<Map<String, Object>> response = userService.users(true, 0, 50);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(hiddenUsers, response.getBody().get("success"));
@@ -350,7 +359,7 @@ public class UserServiceTest {
     when(jdbcTemplate.query(anyString(), any(UserRowMapper.class)))
         .thenThrow(new DataAccessException("Invalid query") {});
 
-    ResponseEntity<Map<String, Object>> response = userService.users(null);
+    ResponseEntity<Map<String, Object>> response = userService.users(null, 0, 50);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals("Invalid query", response.getBody().get("error"));

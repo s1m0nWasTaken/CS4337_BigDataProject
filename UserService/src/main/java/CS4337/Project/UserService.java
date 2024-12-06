@@ -1,6 +1,7 @@
 package CS4337.Project;
 
 import CS4337.Project.Shared.Models.User;
+import CS4337.Project.Shared.Security.AuthUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,17 +33,30 @@ public class UserService {
     SpringApplication.run(UserService.class, args);
   }
 
-  @GetMapping("/users") // pass an ishidden feild in json body to choose
+  @GetMapping("/users") // pass an isHidden field in json body to choose
   public ResponseEntity<Map<String, Object>> users(
-      @RequestParam(required = false) Boolean isHidden) {
-    // TODO: later add a check with auth if admin and if so allow to show hidden
-    // and normal else only normal
+      @RequestParam(required = false) Boolean isHidden,
+      @RequestParam(defaultValue = "0")
+          int lastId, // using a cursor, when getting a batch other than the first you send the last
+      // id you recived the last page
+      @RequestParam(defaultValue = "50") int pageSize) {
+
+    int maxItemsShown = 50;
+
+    if (pageSize > maxItemsShown) {
+      pageSize = 50;
+    }
+
     try {
       if (isHidden != null) {
         boolean hidden = isHidden;
         List<User> users =
             jdbcTemplate.query(
-                "SELECT * FROM User WHERE isHidden = ?", new UserRowMapper(), hidden);
+                "SELECT * FROM User WHERE isHidden = ? AND id > ? ORDER BY id LIMIT ?",
+                new UserRowMapper(),
+                hidden,
+                lastId,
+                pageSize);
 
         return ResponseEntity.ok(Map.of("success", users));
       } else {
@@ -77,6 +91,11 @@ public class UserService {
 
   @GetMapping("/user/{id}")
   public ResponseEntity<Map<String, Object>> getUser(@PathVariable("id") int id) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permissions"));
+    }
+
     try {
       User user =
           jdbcTemplate.queryForObject("SELECT * FROM User WHERE id = ?", new UserRowMapper(), id);
@@ -102,6 +121,11 @@ public class UserService {
 
   @DeleteMapping("/user/{id}")
   public ResponseEntity<Map<String, String>> deleteUser(@PathVariable("id") int id) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to delete this user"));
+    }
+
     try {
       jdbcTemplate.update("DELETE FROM User WHERE id = ?", id);
 
@@ -114,6 +138,11 @@ public class UserService {
   @PutMapping("user/{id}")
   public ResponseEntity<Map<String, Object>> updateUser(
       @PathVariable("id") int id, @RequestBody User userUpdates) {
+    if (!isUserAuthorized(id)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of("error", "You do not have permission to update this user"));
+    }
+
     try {
       List<Object> params = new ArrayList<>();
       StringBuilder updateStatement = new StringBuilder("UPDATE User SET ");
@@ -147,6 +176,18 @@ public class UserService {
     }
   }
 
+  @PutMapping("user/role/{id}")
+  public ResponseEntity<Map<String, Object>> updateUserRole(
+      @PathVariable("id") int id, @RequestParam String role) {
+    try {
+      String sql = "UPDATE `User` SET userType = ? WHERE id = ?";
+      int updatedRows = jdbcTemplate.update(sql, role, id);
+      return ResponseEntity.ok(Map.of("success", String.valueOf(updatedRows)));
+    } catch (DataAccessException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @PutMapping("user/ban/{id}")
   public ResponseEntity<Map<String, Object>> banUser(
       @PathVariable("id") int id, @RequestBody Map<String, String> requestBody) {
@@ -162,5 +203,18 @@ public class UserService {
     } catch (DataAccessException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
+  }
+
+  protected boolean isUserAuthorized(int id) { // change to protected to let test mock true return
+    if (AuthUtils.isUserAdmin()) {
+      return true;
+    }
+
+    int userId = AuthUtils.getUserId();
+
+    if (userId == id) {
+      return true;
+    }
+    return false;
   }
 }

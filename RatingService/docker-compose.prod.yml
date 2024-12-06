@@ -1,0 +1,14 @@
+services:
+  rating-service:
+    image: ratingsvc
+    container_name: rating-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    ports:
+      - "${RATE_CONTAINER_PORT}:${RATE_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

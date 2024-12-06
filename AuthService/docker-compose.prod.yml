@@ -1,0 +1,13 @@
+services:
+  auth-service:
+    build:
+      dockerfile: Dockerfile
+    image: authservice
+    container_name: auth_service
+    network_mode: host
+    ports:
+      - "${AUTH_CONTAINER_PORT}:${AUTH_CONTAINER_PORT}"
+    environment:
+      - ENV=prod
+    env_file:
+      - .env

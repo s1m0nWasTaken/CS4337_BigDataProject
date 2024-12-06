@@ -1,29 +1,31 @@
 services:
   mysql:
     image: mysql:latest
-    container_name: paymentdb
+    container_name: messagingDB
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: payment_service
+      MYSQL_ROOT_PASSWORD: ${DEV_USER_PSWD}
+      MYSQL_DATABASE: messaging_service
     networks:
       - netw
     ports:
-      - "${PAYMENT_MYSQL_SERVER_PORT}:${PAYMENT_MYSQL_CONTAINER_PORT}"
+      - "${MSG_MYSQL_SERVER_PORT}:${MSG_MYSQL_CONTAINER_PORT}"
     volumes:
       - "./src/main/init.sql:/docker-entrypoint-initdb.d/init.sql"
 
-  payment-service:
-    image: paymentservice:latest
+  messaging-service:
+    image: msgservice
+    container_name: msgservice
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: payment-service
     depends_on:
       - mysql
     networks:
       - netw
     ports:
-      - "${PAYMENT_SERVER_PORT}:${PAYMENT_CONTAINER_PORT}"
+      - "${MSG_SERVER_PORT}:${MSG_CONTAINER_PORT}"
+    environment:
+      - ENV=dev
     env_file:
       - .env
 
